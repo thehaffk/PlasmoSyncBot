@@ -225,7 +225,7 @@ async def setrole(ctx, rolename: str, role: discord.Role):
         embedSetrole.add_field(name='Подробнее:', value=f' {role.mention} установлена как {texts["plasmoFusion"]}')
 
     elif rolename.lower() == 'helper' or rolename.lower() == 'хелпер':
-        cursor.execute(f'''UPDATE servers SET fusion_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
+        cursor.execute(f'''UPDATE servers SET helper_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
         embedSetrole.add_field(name='Подробнее:', value=f' {role.mention} установлена как {texts["plasmoHelper"]}')
