@@ -217,7 +217,6 @@ async def help_error(ctx, error):
 async def everyone_sync(ctx, rcd: str = 'хуй', with_logs=True):
     if ctx is not None:
         if rcd.lower() == 'rcd' and ctx.author.id in admins:
-            commands.Command.reset_cooldown(everyone_sync, ctx=ctx)
             await ctx.send('Кулдаун команды сброшен.')
             return None
 
@@ -255,12 +254,15 @@ async def everyone_sync_error(ctx, error):
 
     elif isinstance(error, commands.CommandOnCooldown):
         if ctx is not None:
-            if ctx.author in admins:
+            print('pepega')
+            if ctx.author.id in admins:
+                print('rcd')
+                commands.Command.reset_cooldown(everyone_sync, ctx=ctx)
                 await everyone_sync(ctx)
                 return None
         print(f'у {ctx.guild} кулдаун на everyone_sync, да и похуй')
         if ctx is not None:
-            ctx.send(f'Пока что неьлзя выполнить эту команду. На сервере не прошел кулдаун.')
+            await ctx.send(f'Пока что нельзя выполнить эту команду. На сервере не прошел кулдаун.')
     elif isinstance(error, commands.CommandInvokeError):
         print(ctx.guild, error)
     else:

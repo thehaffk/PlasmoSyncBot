@@ -1,6 +1,6 @@
 config = {
     'token': 'ODQxMDI5NjExMzUzODAwNzA1.YJgz3A.jfaWIR36s0Cmd9eMSPwMqSROFP4',
-    'prefix': 'ps.',
+    'prefix': 'apehumlox.',
     'db': 'servers.db',  # sudo chmod 777 не забудь
     'everyone_sync cooldown': 6000  # кулдаун синхронизации всего сервера (в секундах)
 }
