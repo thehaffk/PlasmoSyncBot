@@ -71,8 +71,8 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
 
     try:
         # Синхронизация ника
-        if db_result[0][
-            5] == 'True' and user_plasmo.display_name is not None and member.display_name != user_plasmo.display_name:
+        if db_result[0][5] == 'True' \
+                and user_plasmo.display_name is not None and member.display_name != user_plasmo.display_name:
             await member.edit(nick=user_plasmo.display_name)
     except Exception as e:
         if not do_not_reply:
@@ -117,6 +117,11 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
 
 @sync.error
 async def sync_error(ctx, error):
+    if ctx is not None:
+        await log(f'sync_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'sync_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         pass
     elif isinstance(error, commands.CommandInvokeError):
@@ -168,6 +173,11 @@ async def settings(ctx):
 
 @settings.error
 async def settings_error(ctx, error):
+    if ctx is not None:
+        await log(f'settings_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         if ctx is not None:
             if ctx.author.id in admins:
@@ -176,16 +186,20 @@ async def settings_error(ctx, error):
         pass
 
 
-# TODO: Переделать под запросы папика(кпидса)
 @bot.command()
 @commands.has_permissions(manage_roles=True, manage_nicknames=True)
 @commands.bot_has_permissions(manage_roles=True, manage_nicknames=True)
 async def help(ctx):
-    await ctx.send(texts['help'])
+    await ctx.send('Руководство пользования ботом -> http://gg.gg/PlasmoSync')
 
 
 @help.error
 async def help_error(ctx, error):
+    if ctx is not None:
+        await log(f'help_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         if ctx is not None:
             if ctx.author.id in admins:
@@ -200,8 +214,15 @@ async def help_error(ctx, error):
 @commands.has_permissions(manage_roles=True, manage_nicknames=True)
 @commands.bot_has_permissions(manage_roles=True, manage_nicknames=True)
 @commands.cooldown(rate=1, per=config['everyone_sync cooldown'], type=commands.BucketType.guild)
-async def everyone_sync(ctx, with_logs=True):
+async def everyone_sync(ctx, rcd: str = None, with_logs=True):
+    if ctx is not None:
+        if rcd.lower() == 'rcd' and ctx.author.id in admins:
+            commands.Command.reset_cooldown(everyone_sync, ctx=ctx)
+            await ctx.send('Кулдаун команды сброшен.')
+            return None
+
     members = ctx.guild.members
+    message = None
     if with_logs:
         embedCounter = discord.Embed(title=(texts['everyone_sync'] + str(ctx.guild)), color=0xffff00)
         embedCounter.add_field(name=texts['syncing'], value=f'{0}/{len(members)}')
@@ -222,17 +243,28 @@ async def everyone_sync(ctx, with_logs=True):
 
 @everyone_sync.error
 async def everyone_sync_error(ctx, error):
+    if ctx is not None:
+        await log(f'everyone_sync_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         if ctx is not None:
             if ctx.author.id in admins:
                 await everyone_sync(ctx)
 
     elif isinstance(error, commands.CommandOnCooldown):
+        if ctx is not None:
+            if ctx.author in admins:
+                await everyone_sync(ctx)
+                return None
         print(f'у {ctx.guild} кулдаун на everyone_sync, да и похуй')
+        if ctx is not None:
+            ctx.send(f'Пока что неьлзя выполнить эту команду. На сервере не прошел кулдаун.')
     elif isinstance(error, commands.CommandInvokeError):
-        pass
+        print(ctx.guild, error)
     else:
-        print(ctx.guild, error)  # Debug
+        print(ctx.guild, error)
 
 
 @bot.command()
@@ -244,19 +276,22 @@ async def setrole(ctx, rolename: str, role: discord.Role):
         cursor.execute(f'''UPDATE servers SET player_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
-        embedSetrole.add_field(name=texts['setrole name'], value=texts['setrole text'].format(role=role.mention, name=texts["plasmoPlayer"]))
+        embedSetrole.add_field(name=texts['setrole name'],
+                               value=texts['setrole text'].format(role=role.mention, name=texts["plasmoPlayer"]))
 
     elif rolename.lower() == 'fusion' or rolename.lower() == 'фужон':
         cursor.execute(f'''UPDATE servers SET fusion_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
-        embedSetrole.add_field(name=texts['setrole name'], value=texts['setrole text'].format(role=role.mention, name=texts["plasmoFusion"]))
+        embedSetrole.add_field(name=texts['setrole name'],
+                               value=texts['setrole text'].format(role=role.mention, name=texts["plasmoFusion"]))
 
     elif rolename.lower() == 'helper' or rolename.lower() == 'хелпер':
         cursor.execute(f'''UPDATE servers SET helper_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
-        embedSetrole.add_field(name=texts['setrole name'], value=texts['setrole text'].format(role=role.mention, name=texts["plasmoHelper"]))
+        embedSetrole.add_field(name=texts['setrole name'],
+                               value=texts['setrole text'].format(role=role.mention, name=texts["plasmoHelper"]))
 
     else:
         await ctx.send(texts['wrongRolename'])
@@ -267,6 +302,11 @@ async def setrole(ctx, rolename: str, role: discord.Role):
 
 @setrole.error
 async def setrole_error(ctx, error):
+    if ctx is not None:
+        await log(f'setrole_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         pass
     elif isinstance(error, commands.MissingRequiredArgument):
@@ -286,19 +326,22 @@ async def remrole(ctx, rolename: str):
         cursor.execute(f'''UPDATE servers SET player_role = 'NULL' WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
-        embedSetrole.add_field(name=texts['remrole name'], value=texts['remrole text'].format(name=texts["plasmoPlayer"]))
+        embedSetrole.add_field(name=texts['remrole name'],
+                               value=texts['remrole text'].format(name=texts["plasmoPlayer"]))
 
     elif rolename.lower() == 'fusion' or rolename.lower() == 'фужон':
         cursor.execute(f'''UPDATE servers SET fusion_role = 'NULL' WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
-        embedSetrole.add_field(name=texts['remrole name'], value=texts['remrole text'].format(name=texts["plasmoFusion"]))
+        embedSetrole.add_field(name=texts['remrole name'],
+                               value=texts['remrole text'].format(name=texts["plasmoFusion"]))
 
     elif rolename.lower() == 'helper' or rolename.lower() == 'хелпер':
         cursor.execute(f'''UPDATE servers SET helper_role = 'NULL' WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
-        embedSetrole.add_field(name=texts['remrole name'], value=texts['remrole text'].format(name=texts["plasmoHelper"]))
+        embedSetrole.add_field(name=texts['remrole name'],
+                               value=texts['remrole text'].format(name=texts["plasmoHelper"]))
 
     else:
         await ctx.send(texts['wrongRolename'])
@@ -309,6 +352,11 @@ async def remrole(ctx, rolename: str):
 
 @remrole.error
 async def remrole_error(ctx, error):
+    if ctx is not None:
+        await log(f'remrole_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         pass
     elif isinstance(error, commands.MissingRequiredArgument):
@@ -344,13 +392,17 @@ async def setdonor(ctx, donor: str):
 
 @setdonor.error
 async def setdonor_error(ctx, error):
+    if ctx is not None:
+        await log(f'setdonor_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         pass
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(texts['MissingRequiredArgument (setdonor)'])
     elif isinstance(error, commands.CommandInvokeError):
         pass
-
 
 
 @bot.command()
@@ -378,6 +430,11 @@ async def onJoin(ctx, value: str):
 
 @onJoin.error
 async def onJoin_error(ctx, error):
+    if ctx is not None:
+        await log(f'onJoin_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
+
     if isinstance(error, commands.MissingPermissions):
         pass
     elif isinstance(error, commands.MissingRequiredArgument):
@@ -411,6 +468,10 @@ async def syncNick(ctx, value: str):
 
 @syncNick.error
 async def syncNick_error(ctx, error):
+    if ctx is not None:
+        await log(f'syncNick_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
     if isinstance(error, commands.MissingPermissions):
         pass
     elif isinstance(error, commands.MissingRequiredArgument):
@@ -444,6 +505,10 @@ async def syncRoles(ctx, value: str):
 
 @syncRoles.error
 async def syncRoles_error(ctx, error):
+    if ctx is not None:
+        await log(f'syncRoles_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
     if isinstance(error, commands.MissingPermissions):
         pass
     elif isinstance(error, commands.MissingRequiredArgument):
@@ -458,9 +523,11 @@ async def syncRoles_error(ctx, error):
 async def status(ctx):
     status_ = discord.Embed(title=texts['botStatus'], color=0x00ff00)
     status_.add_field(name=texts['guilds_installed'], value=f'{len(bot.guilds)}', inline=False)
-    status_.add_field(name=texts['rp_status'], value=f'{texts["connected"] if not rp_error else texts["connection err"]}',
+    status_.add_field(name=texts['rp_status'],
+                      value=f'{texts["connected"] if not rp_error else texts["connection err"]}',
                       inline=False)
-    status_.add_field(name=texts['smp_status'], value=f'{texts["connected"] if not smp_error else texts["connection err"]}',
+    status_.add_field(name=texts['smp_status'],
+                      value=f'{texts["connected"] if not smp_error else texts["connection err"]}',
                       inline=False)
     status_.add_field(name=texts['db_lines'],
                       value=str(len(cursor.execute('SELECT guild_id from servers').fetchall())), inline=False)
@@ -470,14 +537,26 @@ async def status(ctx):
 
 @status.error
 async def status_error(ctx, error):
+    if ctx is not None:
+        await log(f'status_error -> {error} by {ctx.author} in {ctx.guild}')
+    else:
+        await log(f'status_error -> {error}')
     if isinstance(error, commands.MissingPermissions):
         if ctx is not None:
             if ctx.author.id in admins:
                 await status(ctx)
+                return None
+
     elif isinstance(error, commands.CommandInvokeError):
         if ctx is not None:
             if ctx.author.id in admins:
                 await status(ctx)
+
+
+async def log(message):
+    log_channel = bot.get_channel(842391326607540265)
+    await log_channel.send(message)
+
 
 
 # Events:
@@ -537,7 +616,7 @@ async def on_guild_join(guild):
     if len(result) > 0:
         print(f'Joined an old guild {guild.name}')
     else:
-        cursor.execute(f"""INSERT INTO servers VALUES ({guild.id}, 'True', 'False', 'RP', 'False', 'True', 'NULL', 
+        cursor.execute(f"""INSERT INTO servers VALUES ({guild.id}, 'True', 'False', 'RP', 'True', 'True', 'NULL', 
         'NULL', 'NULL')""")
         conn.commit()
         print(f'Joined a new guild {guild.name}')
