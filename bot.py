@@ -214,7 +214,7 @@ async def help_error(ctx, error):
 @commands.has_permissions(manage_roles=True, manage_nicknames=True)
 @commands.bot_has_permissions(manage_roles=True, manage_nicknames=True)
 @commands.cooldown(rate=1, per=config['everyone_sync cooldown'], type=commands.BucketType.guild)
-async def everyone_sync(ctx, rcd: str = None, with_logs=True):
+async def everyone_sync(ctx, rcd: str = 'хуй', with_logs=True):
     if ctx is not None:
         if rcd.lower() == 'rcd' and ctx.author.id in admins:
             commands.Command.reset_cooldown(everyone_sync, ctx=ctx)
