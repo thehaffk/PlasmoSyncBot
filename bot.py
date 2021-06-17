@@ -18,6 +18,7 @@ def is_admin():
 
     return commands.check(predicate)
 
+
 @bot.command(name='eval')
 @is_admin()
 async def _eval(ctx, *, code):
@@ -34,13 +35,11 @@ async def _eval(ctx, *, code):
     }
 ])
 async def _sync(ctx: SlashContext, user: discord.Member = None):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     if user.bot:
         return None
     await sync(ctx=ctx, member=user)
-
 
 
 async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
@@ -145,8 +144,7 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
 
 @slash.slash(name='settings', description='Выводит настройки Plasmo Sync в чат')
 async def settings(ctx):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     print('Settings:', ctx.guild)
     result = cursor.execute(f'''SELECT * FROM servers WHERE guild_id = {ctx.guild.id}''').fetchall()
@@ -192,8 +190,7 @@ async def help(ctx):
 
 @slash.slash(name='everyone-sync', description='Синхронизировать весь сервер')
 async def everyone_sync(ctx):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     members = ctx.guild.members
     embedCounter = discord.Embed(title=(texts['everyone_sync'] + str(ctx.guild)), color=0xffff00)
@@ -227,8 +224,7 @@ async def everyone_sync(ctx):
                  }
              ])
 async def setrole(ctx, rolename, role):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedSetrole = discord.Embed(title=texts['setrole title'], color=texts['setrole color'])
     if rolename.lower() == 'player' or rolename.lower() == 'игрок':
@@ -260,16 +256,15 @@ async def setrole(ctx, rolename, role):
 
 
 @slash.slash(name='resetrole', description='Сбросить настройку синхронизации для конкретной роли', options=[
-        {
-            'name': 'rolename',
-            'description': 'Player / Fusion / Helper',
-            'required': True,
-            'type': 3  # string 3, user 6, int 4
-        }
-    ])
+    {
+        'name': 'rolename',
+        'description': 'Player / Fusion / Helper',
+        'required': True,
+        'type': 3  # string 3, user 6, int 4
+    }
+])
 async def remrole(ctx, rolename):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedSetrole = discord.Embed(title=texts['remrole title'], color=texts['remrole color'])
     if rolename.lower() == 'player' or rolename.lower() == 'игрок':
@@ -301,16 +296,15 @@ async def remrole(ctx, rolename):
 
 
 @slash.slash(name='setdonor', description='Установить локальный сервер-донор для синхронизации', options=[
-        {
-            'name': 'donor',
-            'description': 'RP / SMP',
-            'required': True,
-            'type': 3  # string 3, user 6, int 4
-        }
-    ])
+    {
+        'name': 'donor',
+        'description': 'RP / SMP',
+        'required': True,
+        'type': 3  # string 3, user 6, int 4
+    }
+])
 async def setdonor(ctx, donor: str):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedSetdonor = discord.Embed(title=texts['setdonor title'], color=texts['setdonor color'])
     if donor.lower() == 'rp' or donor.lower() == 'рп':
@@ -332,16 +326,15 @@ async def setdonor(ctx, donor: str):
 
 
 @slash.slash(name='on-join', description='Синхронизировать ли новых пользователей при входе', options=[
-        {
-            'name': 'value',
-            'description': 'Синхронизировать ли новых пользователей при входе',
-            'required': True,
-            'type': 5  # string 3, user 6, int 4
-        }
-    ])
+    {
+        'name': 'value',
+        'description': 'Синхронизировать ли новых пользователей при входе',
+        'required': True,
+        'type': 5  # string 3, user 6, int 4
+    }
+])
 async def onJoin(ctx, value):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedOnJoin = discord.Embed(title=texts['onJoin title'], color=texts['onJoin color'])
     if value:
@@ -359,16 +352,15 @@ async def onJoin(ctx, value):
 
 
 @slash.slash(name='sync-nicknames', description='Синхронизировать ли ники пользователей', options=[
-        {
-            'name': 'value',
-            'description': 'Синхронизировать ли ники пользователей',
-            'required': True,
-            'type': 5  # string 3, user 6, int 4
-        }
-    ])
+    {
+        'name': 'value',
+        'description': 'Синхронизировать ли ники пользователей',
+        'required': True,
+        'type': 5  # string 3, user 6, int 4
+    }
+])
 async def syncNick(ctx, value):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedOnJoin = discord.Embed(title=texts['syncNick title'], color=texts['syncNick color'])
     if value:
@@ -386,16 +378,15 @@ async def syncNick(ctx, value):
 
 
 @slash.slash(name='sync-roles', description='Синхронизировать ли роли пользователей', options=[
-        {
-            'name': 'value',
-            'description': 'Синхронизировать ли роли пользователей',
-            'required': True,
-            'type': 5  # string 3, user 6, int 4
-        }
-    ])
+    {
+        'name': 'value',
+        'description': 'Синхронизировать ли роли пользователей',
+        'required': True,
+        'type': 5  # string 3, user 6, int 4
+    }
+])
 async def syncRoles(ctx, value):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedOnJoin = discord.Embed(title=texts['syncRoles title'], color=texts['syncRoles color'])
     if value:
@@ -415,8 +406,7 @@ async def syncRoles(ctx, value):
 
 @slash.slash(name='status', description='Выводит краткую сводку по состоянию Plasmo Sync')
 async def status(ctx):
-    perms = discord.Permissions(persmissons=ctx.author.guild_permissions)
-    if not perms.manage_nicknames or not perms.manage_roles:
+    if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     status_ = discord.Embed(title=texts['botStatus'], color=0x00ff00)
     status_.add_field(name=texts['guilds_installed'], value=f'{len(bot.guilds)}', inline=False)
