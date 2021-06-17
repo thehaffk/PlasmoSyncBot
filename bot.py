@@ -513,6 +513,21 @@ async def on_member_update(before, after):
 
 
 @bot.event
+async def on_member_remove(member):
+    if member.guild != rp_guild and member.guild != smp_guild:
+        return None
+
+    for guild in bot.guilds:
+        if guild != rp_guild and guild != smp_guild:
+            user = guild.get_member(member.id)
+            if user:
+                await sync(member=user, do_not_reply=True)
+
+    await log(f'<@{_user}> leaves {guild}')
+                
+                
+                
+@bot.event
 async def on_member_ban(guild, _user):
     if guild != rp_guild and guild != smp_guild:
         return None
@@ -554,13 +569,8 @@ async def on_command_error(ctx, error):
                 f'{config["prefix"]}setdonor']
         raw = ctx.message.content
         if raw.split()[0] in cmds and ctx.guild != rp_guild and ctx.guild != smp_guild:
-            await ctx.send('** ⚠️ Недавно Plasmo Sync обновился до версии 2.0 и теперь использует слеш-команды, '
-                           'которые '
-                           'требуют определенного доступа к серверам. Если вы установили Plasmo Sync до 19 июня - '
-                           'установите заново по ссылке: **'
-                           'https://discord.com/oauth2/authorize?client_id=842301877400240140&permissions=402655232'
-                           '&redirect_uri=https%3A%2F%2Fwww.notion.so%2FDiscord-9827cd8b10ee4c33920d9c973ad90a6a'
-                           '&scope=bot%20applications.commands')
+            await ctx.send('** ⚠️ Plasmo Sync больше не поддерживает такие комманды, подробнее на вики'
+                           'https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a')
 
 
 if __name__ == '__main__':
