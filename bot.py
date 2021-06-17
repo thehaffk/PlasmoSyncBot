@@ -569,7 +569,7 @@ async def on_command_error(ctx, error):
                 f'{config["prefix"]}setdonor']
         raw = ctx.message.content
         if raw.split()[0] in cmds and ctx.guild != rp_guild and ctx.guild != smp_guild:
-            await ctx.send('** ⚠️ Plasmo Sync больше не поддерживает такие комманды, подробнее на вики'
+            await ctx.send('** ⚠️ Plasmo Sync больше не поддерживает такие комманды, подробнее на вики ** '
                            'https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a')
 
 
