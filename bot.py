@@ -153,7 +153,7 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
     print(f'[Synced] to: {member.guild} -> {member} from {plasmo_guild}')  # Debug
 
 
-@slash.slash(name='tsettings', description='Выводит настройки Plasmo Sync в чат')
+@slash.slash(name='settings', description='Выводит настройки Plasmo Sync в чат')
 async def settings(ctx):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
@@ -209,13 +209,13 @@ async def settings(ctx):
     await ctx.send(embed=embedSettings)
 
 
-@slash.slash(name='thelp', description='Выводит руководство пользования ботом')
+@slash.slash(name='help', description='Выводит руководство пользования ботом')
 async def help(ctx):
     if ctx.guild is not rp_guild and ctx.guild is not rp_guild:
         await ctx.send('Руководство пользования ботом -> http://gg.gg/PlasmoSync')
 
 
-@slash.slash(name='teveryone-sync', description='Синхронизировать весь сервер')
+@slash.slash(name='everyone-sync', description='Синхронизировать весь сервер')
 async def everyone_sync(ctx):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
@@ -274,7 +274,7 @@ all_roles = [
         ])]
 
 
-@slash.slash(name='tsetrole', description='Настроить синхронизацию ролей',
+@slash.slash(name='setrole', description='Настроить синхронизацию ролей',
              options=[*all_roles, create_option(
                  name='localrole',
                  description='Роль на этом сервере, которую будет выдавать бот',
@@ -295,7 +295,7 @@ async def setrole(ctx, rolename, localrole):
     await ctx.send(embed=embedSetrole)
 
 
-@slash.slash(name='tresetrole', description='Сбросить настройку синхронизации для конкретной роли',
+@slash.slash(name='resetrole', description='Сбросить настройку синхронизации для конкретной роли',
              options=all_roles)
 async def remrole(ctx, rolename):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
@@ -310,7 +310,7 @@ async def remrole(ctx, rolename):
     await ctx.send(embed=embedremrole)
 
 
-@slash.slash(name='tsetdonor', description='Установить локальный сервер-донор для синхронизации',
+@slash.slash(name='setdonor', description='Установить локальный сервер-донор для синхронизации',
              options=[
                  create_option(
                      name='donor',
@@ -340,7 +340,7 @@ async def setdonor(ctx, donor: str):
     await ctx.send(embed=embedSetdonor)
 
 
-@slash.slash(name='ton-join', description='Синхронизировать ли новых пользователей при входе', options=[
+@slash.slash(name='on-join', description='Синхронизировать ли новых пользователей при входе', options=[
     {
         'name': 'value',
         'description': 'Синхронизировать ли новых пользователей при входе',
@@ -366,7 +366,7 @@ async def onJoin(ctx, value):
     await ctx.send(embed=embedOnJoin)
 
 
-@slash.slash(name='tsync-nicknames', description='Синхронизировать ли ники пользователей', options=[
+@slash.slash(name='sync-nicknames', description='Синхронизировать ли ники пользователей', options=[
     {
         'name': 'value',
         'description': 'Синхронизировать ли ники пользователей',
@@ -392,7 +392,7 @@ async def syncNick(ctx, value):
     await ctx.send(embed=embedOnJoin)
 
 
-@slash.slash(name='tsync-roles', description='Синхронизировать ли роли пользователей', options=[
+@slash.slash(name='sync-roles', description='Синхронизировать ли роли пользователей', options=[
     {
         'name': 'value',
         'description': 'Синхронизировать ли роли пользователей',
@@ -419,7 +419,7 @@ async def syncRoles(ctx, value):
     await ctx.send(embed=embedOnJoin)
 
 
-@slash.slash(name='tstatus', description='Выводит краткую сводку по состоянию Plasmo Sync')
+@slash.slash(name='status', description='Выводит краткую сводку по состоянию Plasmo Sync')
 async def status(ctx):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
