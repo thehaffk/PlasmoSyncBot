@@ -1,5 +1,5 @@
 config = {
-    'token': 'ODQxMDI5NjExMzUzODAwNzA1.YJgz3A.NqTDgLNj0yRH0xlpe2Pnpr2LtOk',
+    'token': '??? Pepega',
     'prefix': 'ps.',
     'db': 'servers.db',  # sudo chmod 777 не забудь
 }
@@ -9,13 +9,17 @@ rp = {
     'id': 672312131760291842,  # 672312131760291842
     'player': 746628733452025866,  # 746628733452025866
     'fusion': 751722994170331136,  # 751722994170331136
-    'helper': 751723033357451335  # 751723033357451335
+    'helper': 751723033357451335,  # 751723033357451335
+    'banker': 826367015014498314,
+    'mko_head': 810492714235723777,
+    'mko_helper': 826366703591620618,
+    'mko_member': 844507728671277106,
 }
 smp = {
-    'id': 841024625102422016,
-    'player': 841056589234700329,
-    'fusion': 841056624915513385,
-    'helper': 841056667503296512
+    'id': 385007717623922688,
+    'player': 626887926373941258,
+    'fusion': 626887902953209866,
+    'helper': 626887908946739200
 }
 texts = {
     # Общие приколы
@@ -26,9 +30,6 @@ texts = {
     'settingsDonor': 'Сервер-донор',
     'settingsSyncRoles': 'Синхронизировать роли',
     'settingsSyncNicknames': 'Синхронизировать ники',
-    'settingsPlayerRole': 'Роль Plasmo Player',
-    'settingsFusionRole': 'Роль Plasmo Fusion',
-    'settingsHelperRole': 'Роль Plasmo Helper',
 
     'on': 'Включено',
     'off': 'Выключено',
@@ -102,9 +103,14 @@ texts = {
 
 
     # Общие приколы
-    'plasmoPlayer': 'Игрок Plasmo',
-    'plasmoFusion': 'Fusion',
-    'plasmoHelper': 'Хелпер',
+    'player': 'Игрок Plasmo',
+    'fusion': 'Fusion',
+    'helper': 'Интерпол',
+    'banker': 'Банкир',
+    'mko_head': 'Член Совета Глав МКО',
+    'mko_helper': 'Помощник Совета Глав МКО',
+    'mko_member': 'Участник Совета МКО',
+
     'connected': 'Подключено',
     'connection err': 'Помянем',
 }

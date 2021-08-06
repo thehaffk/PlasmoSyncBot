@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from discord_slash.utils.manage_commands import create_choice, create_option
+import updater
 from settings import config, rp, smp, texts, admins
 import sqlite3
 from discord_slash import SlashCommand, SlashContext
@@ -26,7 +28,7 @@ async def _eval(ctx, *, code):
     await ctx.send(resp if bool(resp) else 'None')
 
 
-@slash.slash(name='sync', description='Синхронизировать конкретного игрока', options=[
+@slash.slash(name='tsync', description='Синхронизировать конкретного игрока', options=[
     {
         'name': 'user',
         'description': 'User to sync',
@@ -110,39 +112,48 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
     #  Синхронизация ролей
     if db_result[0][4] == 'True':
         user_plasmo_roles = user_plasmo.roles
-        guild_roles = member.guild.get_member(member.id).roles
+        local_roles = member.guild.get_member(member.id).roles
 
-        if db_result[0][6] != 'NULL':
-            player_role = member.guild.get_role(db_result[0][6])
-            if player_role is not None:  # Проходка
-                if plasmo_player in user_plasmo_roles:
-                    await member.add_roles(player_role)
-                elif player_role in guild_roles:
-                    await member.remove_roles(player_role)
+        db_roles = {
+            'player': db_result[0][6],
+            'fusion': db_result[0][7],
+            'helper': db_result[0][8],
+        }
+        if db_result[0][3] == 'RP':
+            plasmo_roles = rp
+            db_roles = {
+                'player': db_result[0][6],
+                'fusion': db_result[0][7],
+                'helper': db_result[0][8],
+                'banker': db_result[0][9],
+                'mko_head': db_result[0][10],
+                'mko_helper': db_result[0][11],
+                'mko_member': db_result[0][12]
+                    }
+        else:
+            plasmo_roles = smp
 
-        if db_result[0][7] != 'NULL':
-            fusion_role = member.guild.get_role(db_result[0][7])
-            if fusion_role is not None:  # Роль фужона
-                if plasmo_fusion in user_plasmo_roles:
-                    await member.add_roles(fusion_role)
-                elif fusion_role in guild_roles:
-                    await member.remove_roles(fusion_role)
+        for role in db_roles:
+            print(role)
+            if db_roles[role]:
+                local_role = member.guild.get_role(db_roles[role])
+                donor_role = plasmo_guild.get_role(plasmo_roles[role])
+                print(role, local_role, donor_role)
+                if local_role and donor_role:
+                    try:
+                        if donor_role in user_plasmo_roles:
+                            await member.add_roles(local_role)
+                        elif donor_role in local_roles:
+                            await member.remove_roles(local_role)
+                    except Exception:
+                        pass
 
-        if db_result[0][8] != 'NULL':
-            helper_role = member.guild.get_role(db_result[0][8])
-            if helper_role is not None:  # Роль хелпера
-                if plasmo_helper in user_plasmo_roles:
-                    await member.add_roles(helper_role)
-                elif helper_role in guild_roles:
-                    await member.remove_roles(helper_role)
-
-        # Ну не работает и не работает, че бубнить то
     if not do_not_reply:
         await ctx.send(texts["done"].format(mention=ctx.author.mention))
     print(f'[Synced] to: {member.guild} -> {member} from {plasmo_guild}')  # Debug
 
 
-@slash.slash(name='settings', description='Выводит настройки Plasmo Sync в чат')
+@slash.slash(name='tsettings', description='Выводит настройки Plasmo Sync в чат')
 async def settings(ctx):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
@@ -164,6 +175,22 @@ async def settings(ctx):
     embedSettings.add_field(name=texts['settingsSyncRoles'],
                             value=f"{texts['on'] if result[0][4] == 'True' else texts['off']}", inline=False)
     if bool(result[0][4]):
+        rolenames = {
+        'Игрок Plasmo': result[0][6],
+        'Fusion': result[0][7],
+        'Интерпол / Хелпер': result[0][8],
+        'Банкир': result[0][9],
+        'Член Совета Глав МКО': result[0][10],
+        'Помощник Совета Глав МКО': result[0][11],
+        'Участник Совета МКО': result[0][12]
+        }
+        for _role in rolenames:
+            try:
+                embedSettings.add_field(name=_role,
+                                        value=f"{ctx.guild.get_role(rolenames[_role]).mention}", inline=False)
+            except Exception:
+                pass
+
         try:
             embedSettings.add_field(name=texts['settingsPlayerRole'],
                                     value=f"{ctx.guild.get_role(result[0][6]).mention}", inline=False)
@@ -182,13 +209,13 @@ async def settings(ctx):
     await ctx.send(embed=embedSettings)
 
 
-@slash.slash(name='help', description='Выводит руководство пользования ботом')
+@slash.slash(name='thelp', description='Выводит руководство пользования ботом')
 async def help(ctx):
     if ctx.guild is not rp_guild and ctx.guild is not rp_guild:
         await ctx.send('Руководство пользования ботом -> http://gg.gg/PlasmoSync')
 
 
-@slash.slash(name='everyone-sync', description='Синхронизировать весь сервер')
+@slash.slash(name='teveryone-sync', description='Синхронизировать весь сервер')
 async def everyone_sync(ctx):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
@@ -208,124 +235,112 @@ async def everyone_sync(ctx):
     await message.edit(embed=embedCounter)
 
 
-@slash.slash(name='setrole', description='Настроить синхронизацию ролей',
-             options=[
-                 {
-                     'name': 'rolename',
-                     'description': 'Player / Fusion / Helper',
-                     'required': True,
-                     'type': 3  # string 3, user 6, int 4
-                 },
-                 {
-                     'name': 'role',
-                     'description': 'Роль',
-                     'required': True,
-                     'type': 8  # string 3, user 6, int 4
-                 }
-             ])
-async def setrole(ctx, rolename, role):
+all_roles = [
+    create_option(
+        name='rolename',
+        description='Роль',
+        option_type=3,
+        required=True,
+        choices=[
+            create_choice(
+                name='Игрок',
+                value='player'
+            ),
+            create_choice(
+                name='Fusion',
+                value='fusion'
+            ),
+            create_choice(
+                name='Интерпол / Хелпер',
+                value='helper'
+            ),
+            create_choice(
+                name='Банкир (PRP)',
+                value='banker',
+
+            ),
+            create_choice(
+                name='Член Совета Глав МКО (PRP)',
+                value='mko_head'
+            ),
+            create_choice(
+                name='Помощник Совета Глав (PRP)',
+                value='mko_helper'
+            ),
+            create_choice(
+                name='Участник Совета МКО (PRP)',
+                value='mko_member'
+            ),
+        ])]
+
+
+@slash.slash(name='tsetrole', description='Настроить синхронизацию ролей',
+             options=[*all_roles, create_option(
+                 name='localrole',
+                 description='Роль на этом сервере, которую будет выдавать бот',
+                 option_type=8,
+                 required=True
+             )])
+async def setrole(ctx, rolename, localrole):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedSetrole = discord.Embed(title=texts['setrole title'], color=texts['setrole color'])
-    if rolename.lower() == 'player' or rolename.lower() == 'игрок':
-        cursor.execute(f'''UPDATE servers SET player_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
 
-        embedSetrole.add_field(name=texts['setrole name'],
-                               value=texts['setrole text'].format(role=role.mention, name=texts["plasmoPlayer"]))
+    cursor.execute(f'''UPDATE servers SET {rolename}_role = {localrole.id} WHERE guild_id = {ctx.guild.id}''')
+    conn.commit()
 
-    elif rolename.lower() == 'fusion' or rolename.lower() == 'фужон':
-        cursor.execute(f'''UPDATE servers SET fusion_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
-
-        embedSetrole.add_field(name=texts['setrole name'],
-                               value=texts['setrole text'].format(role=role.mention, name=texts["plasmoFusion"]))
-
-    elif rolename.lower() == 'helper' or rolename.lower() == 'хелпер':
-        cursor.execute(f'''UPDATE servers SET helper_role = {role.id} WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
-
-        embedSetrole.add_field(name=texts['setrole name'],
-                               value=texts['setrole text'].format(role=role.mention, name=texts["plasmoHelper"]))
-
-    else:
-        await ctx.send(texts['wrongRolename'])
-        return False
+    embedSetrole.add_field(name=texts['setrole name'],
+                           value=texts['setrole text'].format(role=localrole.mention, name=texts[rolename]))
 
     await ctx.send(embed=embedSetrole)
 
 
-@slash.slash(name='resetrole', description='Сбросить настройку синхронизации для конкретной роли', options=[
-    {
-        'name': 'rolename',
-        'description': 'Player / Fusion / Helper',
-        'required': True,
-        'type': 3  # string 3, user 6, int 4
-    }
-])
+@slash.slash(name='tresetrole', description='Сбросить настройку синхронизации для конкретной роли',
+             options=all_roles)
 async def remrole(ctx, rolename):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
-    embedSetrole = discord.Embed(title=texts['remrole title'], color=texts['remrole color'])
-    if rolename.lower() == 'player' or rolename.lower() == 'игрок':
-        cursor.execute(f'''UPDATE servers SET player_role = 'NULL' WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
+    embedremrole = discord.Embed(title=texts['remrole title'], color=texts['remrole color'])
 
-        embedSetrole.add_field(name=texts['remrole name'],
-                               value=texts['remrole text'].format(name=texts["plasmoPlayer"]))
+    cursor.execute(f'''UPDATE servers SET {rolename}_role = null WHERE guild_id = {ctx.guild.id}''')
+    conn.commit()
+    embedremrole.add_field(name=texts['remrole name'],
+                           value=texts['remrole text'].format(name=texts[rolename]))
 
-    elif rolename.lower() == 'fusion' or rolename.lower() == 'фужон':
-        cursor.execute(f'''UPDATE servers SET fusion_role = 'NULL' WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
-
-        embedSetrole.add_field(name=texts['remrole name'],
-                               value=texts['remrole text'].format(name=texts["plasmoFusion"]))
-
-    elif rolename.lower() == 'helper' or rolename.lower() == 'хелпер':
-        cursor.execute(f'''UPDATE servers SET helper_role = 'NULL' WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
-
-        embedSetrole.add_field(name=texts['remrole name'],
-                               value=texts['remrole text'].format(name=texts["plasmoHelper"]))
-
-    else:
-        await ctx.send(texts['wrongRolename'])
-        return False
-
-    await ctx.send(embed=embedSetrole)
+    await ctx.send(embed=embedremrole)
 
 
-@slash.slash(name='setdonor', description='Установить локальный сервер-донор для синхронизации', options=[
-    {
-        'name': 'donor',
-        'description': 'RP / SMP',
-        'required': True,
-        'type': 3  # string 3, user 6, int 4
-    }
-])
+@slash.slash(name='tsetdonor', description='Установить локальный сервер-донор для синхронизации',
+             options=[
+                 create_option(
+                     name='donor',
+                     description='Сервер с которого нужно синхрнизировать роли и ники',
+                     option_type=3,
+                     required=True,
+                     choices=[
+                         create_choice(
+                             name='Plasmo RP',
+                             value='RP'
+                         ),
+                         create_choice(
+                             name='Plasmo SMP',
+                             value='SMP'
+                         ),
+                     ])])
 async def setdonor(ctx, donor: str):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
     embedSetdonor = discord.Embed(title=texts['setdonor title'], color=texts['setdonor color'])
-    if donor.lower() == 'rp' or donor.lower() == 'рп':
-        cursor.execute(f'''UPDATE servers SET server = 'RP' WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
 
-        embedSetdonor.add_field(name=texts['setdonor name'], value=texts['setdonor text'].format(guild='RP'))
+    cursor.execute(f'''UPDATE servers SET server = "{donor}" WHERE guild_id = {ctx.guild.id}''')
+    conn.commit()
 
-    elif donor.lower() == 'smp' or donor.lower() == 'смп':
-        cursor.execute(f'''UPDATE servers SET server = 'SMP' WHERE guild_id = {ctx.guild.id}''')
-        conn.commit()
-
-        embedSetdonor.add_field(name=texts['setdonor name'], value=texts['setdonor text'].format(guild='SMP'))
-    else:
-        await ctx.send(texts['ArgumentsError (setdonor)'])
-        return False
+    embedSetdonor.add_field(name=texts['setdonor name'], value=texts['setdonor text'].format(guild=donor))
 
     await ctx.send(embed=embedSetdonor)
 
 
-@slash.slash(name='on-join', description='Синхронизировать ли новых пользователей при входе', options=[
+@slash.slash(name='ton-join', description='Синхронизировать ли новых пользователей при входе', options=[
     {
         'name': 'value',
         'description': 'Синхронизировать ли новых пользователей при входе',
@@ -351,7 +366,7 @@ async def onJoin(ctx, value):
     await ctx.send(embed=embedOnJoin)
 
 
-@slash.slash(name='sync-nicknames', description='Синхронизировать ли ники пользователей', options=[
+@slash.slash(name='tsync-nicknames', description='Синхронизировать ли ники пользователей', options=[
     {
         'name': 'value',
         'description': 'Синхронизировать ли ники пользователей',
@@ -377,7 +392,7 @@ async def syncNick(ctx, value):
     await ctx.send(embed=embedOnJoin)
 
 
-@slash.slash(name='sync-roles', description='Синхронизировать ли роли пользователей', options=[
+@slash.slash(name='tsync-roles', description='Синхронизировать ли роли пользователей', options=[
     {
         'name': 'value',
         'description': 'Синхронизировать ли роли пользователей',
@@ -404,7 +419,7 @@ async def syncRoles(ctx, value):
     await ctx.send(embed=embedOnJoin)
 
 
-@slash.slash(name='status', description='Выводит краткую сводку по состоянию Plasmo Sync')
+@slash.slash(name='tstatus', description='Выводит краткую сводку по состоянию Plasmo Sync')
 async def status(ctx):
     if not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles:
         return False
@@ -423,7 +438,7 @@ async def status(ctx):
 
 
 async def log(message):
-    log_channel = bot.get_channel(842391326607540265)
+    log_channel = bot.get_channel(873137637085544459)
     await log_channel.send(message)
 
 
@@ -431,7 +446,7 @@ async def log(message):
 
 @bot.event
 async def on_ready():
-    global rp_guild, rp_fusion, rp_player, rp_helper, rp_error
+    global rp_guild, rp_fusion, rp_player, rp_helper, banker, mko_head, mko_helper, mko_member, rp_error
     rp_guild = bot.get_guild(rp['id'])
     if rp_guild is None:
         rp_error = True
@@ -443,6 +458,10 @@ async def on_ready():
         rp_fusion = rp_guild.get_role(rp['fusion'])
         rp_player = rp_guild.get_role(rp['player'])
         rp_helper = rp_guild.get_role(rp['helper'])
+        banker = rp_guild.get_role(rp['banker'])
+        mko_head = rp_guild.get_role(rp['mko_head'])
+        mko_helper = rp_guild.get_role(rp['mko_helper'])
+        mko_member = rp_guild.get_role(rp['mko_member'])
 
     global smp_guild, smp_fusion, smp_player, smp_helper, smp_error
     smp_guild = bot.get_guild(smp['id'])
@@ -461,6 +480,7 @@ async def on_ready():
     global cursor, conn
     conn = sqlite3.connect(config['db'])
     cursor = conn.cursor()
+    updater.fix_db()
 
     all_guilds = bot.guilds
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Game(texts['activity']))
@@ -473,12 +493,14 @@ async def on_ready():
     await log(f'Located at **{len(all_guilds)}** servers.')
 
     guilds_ids = cursor.execute('SELECT guild_id FROM servers').fetchall()
+    guilds = '**[GUILDS]**'
     for guild in all_guilds:
         if (guild.id,) not in guilds_ids and guild is not rp_guild and guild is not smp_guild:
             print(f'Fixed (downtime join) - ', end="")
             await log(f'Fixed (downtime join) - {guild}')
             await on_guild_join(guild)
-        await log(guild)
+        guilds += f'\n **[GUILD]** {guild}'
+    await log(guilds)
 
 
 @bot.event
@@ -492,8 +514,8 @@ async def on_guild_join(guild):
         print(f'Joined an old guild {guild.name}')
         await log(f'Joined an old guild {guild.name}')
     else:
-        cursor.execute(f"""INSERT INTO servers VALUES ({guild.id}, 'True', 'False', 'RP', 'True', 'True', 'NULL', 
-        'NULL', 'NULL')""")
+        cursor.execute(f'INSERT INTO servers (guild_id, sync_nick) VALUES ({guild.id}, True)')
+
         conn.commit()
         print(f'Joined a new guild {guild.name}')
         await log(f'Joined a new guild {guild.name}')
@@ -523,22 +545,20 @@ async def on_member_remove(member):
             if user:
                 await sync(member=user, do_not_reply=True)
 
-    await log(f'<@{_user}> leaves {guild}')
-                
-                
-                
+    await log(f'{member.mention} leaves {guild}')
+
+
 @bot.event
 async def on_member_ban(guild, _user):
+    await log(f'{_user.mention}({_user}) got banned on {guild}')
     if guild != rp_guild and guild != smp_guild:
         return None
 
     for guild in bot.guilds:
         if guild != rp_guild and guild != smp_guild:
             user = guild.get_member(_user.id)
-            if user is not None:
+            if user:
                 await sync(member=user, do_not_reply=True)
-
-    await log(f'<@{_user}> get banned on {guild}')
 
 
 @bot.event
@@ -546,9 +566,7 @@ async def on_member_join(member):
     if member.guild == rp_guild or member.guild == smp_guild:
         return None
     db_result = cursor.execute(f''' SELECT on_join FROM servers WHERE guild_id = {member.guild.id}''').fetchone()
-    if db_result is None:
-        return None
-    elif db_result[0] == 'True':
+    if db_result is not None and db_result[0] == 'True':
         await sync(member, member=member, do_not_reply=True)
     return None
 
