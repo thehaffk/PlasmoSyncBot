@@ -191,21 +191,6 @@ async def settings(ctx):
             except Exception:
                 pass
 
-        try:
-            embedSettings.add_field(name=texts['settingsPlayerRole'],
-                                    value=f"{ctx.guild.get_role(result[0][6]).mention}", inline=False)
-        except Exception:
-            embedSettings.add_field(name=texts['settingsPlayerRole'], value=f"Не задано", inline=False)
-        try:
-            embedSettings.add_field(name=texts['settingsFusionRole'],
-                                    value=f"{ctx.guild.get_role(result[0][7]).mention}", inline=False)
-        except Exception:
-            embedSettings.add_field(name=texts['settingsFusionRole'], value=f"Не задано", inline=False)
-        try:
-            embedSettings.add_field(name=texts['settingsHelperRole'],
-                                    value=f"{ctx.guild.get_role(result[0][8]).mention}", inline=False)
-        except Exception:
-            embedSettings.add_field(name=texts['settingsHelperRole'], value=f"Не задано", inline=False)
     await ctx.send(embed=embedSettings)
 
 
