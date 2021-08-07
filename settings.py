@@ -1,5 +1,5 @@
 config = {
-    'token': '??? Pepega',
+    'token': '???? Pepega',
     'prefix': 'ps.',
     'db': 'servers.db',  # sudo chmod 777 не забудь
 }
