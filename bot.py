@@ -24,6 +24,7 @@ def is_admin():
 @bot.command(name='eval')
 @is_admin()
 async def _eval(ctx, *, code):
+
     resp = eval(code)
     await ctx.send(resp if bool(resp) else 'None')
 
@@ -37,7 +38,7 @@ async def _eval(ctx, *, code):
     }
 ])
 async def _sync(ctx: SlashContext, user: discord.Member = None):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     if user.bot:
@@ -130,7 +131,7 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
                 'mko_head': db_result[0][10],
                 'mko_helper': db_result[0][11],
                 'mko_member': db_result[0][12]
-                    }
+            }
         else:
             plasmo_roles = smp
 
@@ -155,7 +156,7 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
 
 @slash.slash(name='settings', description='Выводит настройки Plasmo Sync в чат')
 async def settings(ctx):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     print('Settings:', ctx.guild)
@@ -177,13 +178,13 @@ async def settings(ctx):
                             value=f"{texts['on'] if result[0][4] == 'True' else texts['off']}", inline=False)
     if bool(result[0][4]):
         rolenames = {
-        'Игрок Plasmo': result[0][6],
-        'Fusion': result[0][7],
-        'Интерпол / Хелпер': result[0][8],
-        'Банкир': result[0][9],
-        'Член Совета Глав МКО': result[0][10],
-        'Помощник Совета Глав МКО': result[0][11],
-        'Участник Совета МКО': result[0][12]
+            'Игрок Plasmo': result[0][6],
+            'Fusion': result[0][7],
+            'Интерпол / Хелпер': result[0][8],
+            'Банкир': result[0][9],
+            'Член Совета Глав МКО': result[0][10],
+            'Помощник Совета Глав МКО': result[0][11],
+            'Участник Совета МКО': result[0][12]
         }
         for _role in rolenames:
             try:
@@ -203,7 +204,7 @@ async def help(ctx):
 
 @slash.slash(name='everyone-sync', description='Синхронизировать весь сервер')
 async def everyone_sync(ctx):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     members = ctx.guild.members
@@ -269,7 +270,7 @@ all_roles = [
                  required=True
              )])
 async def setrole(ctx, rolename, localrole):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     embedSetrole = discord.Embed(title=texts['setrole title'], color=texts['setrole color'])
@@ -286,7 +287,7 @@ async def setrole(ctx, rolename, localrole):
 @slash.slash(name='resetrole', description='Сбросить настройку синхронизации для конкретной роли',
              options=all_roles)
 async def remrole(ctx, rolename):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     embedremrole = discord.Embed(title=texts['remrole title'], color=texts['remrole color'])
@@ -317,7 +318,7 @@ async def remrole(ctx, rolename):
                          ),
                      ])])
 async def setdonor(ctx, donor: str):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     embedSetdonor = discord.Embed(title=texts['setdonor title'], color=texts['setdonor color'])
@@ -339,17 +340,17 @@ async def setdonor(ctx, donor: str):
     }
 ])
 async def onJoin(ctx, value):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     embedOnJoin = discord.Embed(title=texts['onJoin title'], color=texts['onJoin color'])
     if value:
-        cursor.execute(f'''UPDATE servers SET on_join = 'True' WHERE guild_id = {ctx.guild.id}''')
+        cursor.execute(f'''UPDATE servers SET on_join = 1 WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
         embedOnJoin.add_field(name=texts['onJoin name'], value=texts['onJoin text true'])
     else:
-        cursor.execute(f'''UPDATE servers SET on_join = 'False' WHERE guild_id = {ctx.guild.id}''')
+        cursor.execute(f'''UPDATE servers SET on_join = 0 WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
         embedOnJoin.add_field(name=texts['onJoin name'], value=texts['onJoin text false'])
@@ -366,18 +367,18 @@ async def onJoin(ctx, value):
     }
 ])
 async def syncNick(ctx, value):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     embedOnJoin = discord.Embed(title=texts['syncNick title'], color=texts['syncNick color'])
     if value:
-        cursor.execute(f'''UPDATE servers SET sync_nick = 'True' WHERE guild_id = {ctx.guild.id}''')
+        cursor.execute(f'''UPDATE servers SET sync_nick = 1 WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
         embedOnJoin.add_field(name=texts['syncNick name'], value=texts['syncNick text true'])
 
     else:
-        cursor.execute(f'''UPDATE servers SET sync_nick = 'False' WHERE guild_id = {ctx.guild.id}''')
+        cursor.execute(f'''UPDATE servers SET sync_nick = 0 WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
         embedOnJoin.add_field(name=texts['syncNick name'], value=texts['syncNick text false'])
 
@@ -393,18 +394,18 @@ async def syncNick(ctx, value):
     }
 ])
 async def syncRoles(ctx, value):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     embedOnJoin = discord.Embed(title=texts['syncRoles title'], color=texts['syncRoles color'])
     if value:
-        cursor.execute(f'''UPDATE servers SET sync_roles = 'True' WHERE guild_id = {ctx.guild.id}''')
+        cursor.execute(f'''UPDATE servers SET sync_roles = 1 WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
         embedOnJoin.add_field(name=texts['syncRoles name'], value=texts['syncRoles text true'])
 
     else:
-        cursor.execute(f'''UPDATE servers SET sync_roles = 'False' WHERE guild_id = {ctx.guild.id}''')
+        cursor.execute(f'''UPDATE servers SET sync_roles = 0 WHERE guild_id = {ctx.guild.id}''')
         conn.commit()
 
         embedOnJoin.add_field(name=texts['syncRoles name'], value=texts['syncRoles text false'])
@@ -414,7 +415,7 @@ async def syncRoles(ctx, value):
 
 @slash.slash(name='status', description='Выводит краткую сводку по состоянию Plasmo Sync')
 async def status(ctx):
-    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles)\
+    if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
             and not ctx.author.id in admins:
         return False
     status_ = discord.Embed(title=texts['botStatus'], color=0x00ff00)
@@ -508,7 +509,7 @@ async def on_guild_join(guild):
         print(f'Joined an old guild {guild.name}')
         await log(f'Joined an old guild {guild.name}')
     else:
-        cursor.execute(f'INSERT INTO servers (guild_id, sync_nick) VALUES ({guild.id}, True)')
+        cursor.execute(f'INSERT INTO servers (guild_id, sync_nick) VALUES ({guild.id}, 1)')
 
         conn.commit()
         print(f'Joined a new guild {guild.name}')
@@ -539,7 +540,7 @@ async def on_member_remove(member):
             if user:
                 await sync(member=user, do_not_reply=True)
 
-    await log(f'{member.mention} leaves {guild}')
+    await log(f'{member.mention} leaves {member.guild}')
 
 
 @bot.event
@@ -557,12 +558,15 @@ async def on_member_ban(guild, _user):
 
 @bot.event
 async def on_member_join(member):
-    if member.guild == rp_guild or member.guild == smp_guild:
+    try:
+        if member.guild == rp_guild or member.guild == smp_guild:
+            return None
+        db_result = cursor.execute(f''' SELECT on_join FROM servers WHERE guild_id = {member.guild.id}''').fetchone()
+        if db_result is not None and db_result[0] == 'True':
+            await sync(member, member=member, do_not_reply=True)
         return None
-    db_result = cursor.execute(f''' SELECT on_join FROM servers WHERE guild_id = {member.guild.id}''').fetchone()
-    if db_result is not None and db_result[0] == 'True':
-        await sync(member, member=member, do_not_reply=True)
-    return None
+    except Exception as e:
+        await log(str(e))
 
 
 @bot.event
