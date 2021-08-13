@@ -1,5 +1,5 @@
 config = {
-    'token': 'ODQyMzAxODc3NDAwMjQwMTQw.YJzUwA.1hr1tXBNSG_QLpcGoFP0jUGAu20',
+    'token': 'ODQxMDI5NjExMzUzODAwNzA1.YJgz3A.NqTDgLNj0yRH0xlpe2Pnpr2LtOk',  # это токен от тестового
     'prefix': 'ps.',
     'db': 'servers.db',  # sudo chmod 777 не забудь
 }
@@ -58,23 +58,23 @@ texts = {
     'onJoin color': 0x00ff00,
     'onJoin title': 'Изменены настройки',
     'onJoin name': 'Подробнее:',
-    'onJoin text true': 'Синхронизация при входе включена',
-    'onJoin text false': 'Синхронизация при входе отключена',
+    'onJoin text True': 'Синхронизация при входе включена',
+    'onJoin text False': 'Синхронизация при входе отключена',
 
     # Приколы из sync-nicknames
     'syncNick color': 0x00ff00,
     'syncNick title': 'Изменены настройки',
     'syncNick name': 'Подробнее:',
-    'syncNick text true': 'Синхронизация ников включена',
-    'syncNick text false': 'Синхронизация ников отключена',
+    'syncNick text True': 'Синхронизация ников включена',
+    'syncNick text False': 'Синхронизация ников отключена',
 
 
     # Приколы из sync-roles
     'syncRoles color': 0x00ff00,
     'syncRoles title': 'Изменены настройки',
     'syncRoles name': 'Подробнее:',
-    'syncRoles text true': 'Синхронизация ролей включена',
-    'syncRoles text false': 'Синхронизация ролей отключена',
+    'syncRoles text True': 'Синхронизация ролей включена',
+    'syncRoles text False': 'Синхронизация ролей отключена',
 
     # Приколы из help
     'help': 'Тебе только бог поможет',  # Сам хелп
