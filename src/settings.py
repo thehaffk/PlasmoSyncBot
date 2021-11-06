@@ -1,5 +1,5 @@
 config = {
-    'token': 'ODQxMDI5NjExMzUzODAwNzA1.YJgz3A.NqTDgLNj0yRH0xlpe2Pnpr2LtOk',  # это токен от тестового
+    'token': 'P3P3G2.P3P3G2.P3P3G2.P3P3G2.P3P3G2.P3P3G2.P3P3G2.P3P3G2.',  # это токен от тестового
     'prefix': 'ps.',
     'db': 'servers.db',  # sudo chmod 777 не забудь
 }
@@ -21,9 +21,16 @@ smp = {
     'fusion': 626887902953209866,
     'helper': 626887908946739200
 }
+
+frp = {
+    'id': 760608196519133205,
+    'player': 846004768425508894,
+    'fusion': 790939484215967794,
+    }
+
 texts = {
     # Общие приколы
-    'activity': 'rp.plo.su',
+    'activity': 'Plasmo FRP is available to sync now!',
     'settings color': 0x00ff00,
     'settings': 'Настройки PlasmoSync | ',
     'settingsOnJoin': 'Синхронизация при входе',

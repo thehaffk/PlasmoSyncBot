@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord_slash.utils.manage_commands import create_choice, create_option
 import updater
-from settings import config, rp, smp, texts, admins
+from settings import config, rp, smp, frp, texts, admins
 import sqlite3
 from discord_slash import SlashCommand, SlashContext
 
@@ -59,14 +59,10 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
         return None
     if db_result[0][3] == 'RP':
         plasmo_guild = rp_guild
-        plasmo_player = rp_player
-        plasmo_fusion = rp_fusion
-        plasmo_helper = rp_helper
     elif db_result[0][3] == 'SMP':
         plasmo_guild = smp_guild
-        plasmo_player = smp_player
-        plasmo_fusion = smp_fusion
-        plasmo_helper = smp_helper
+    elif db_result[0][3] == 'FRP':
+        plasmo_guild = frp_guild
     else:
         if not do_not_reply:
             await ctx.send(texts['err'])
@@ -83,7 +79,6 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
         if not do_not_reply:
             await ctx.send(texts["memberNotFound (sync | guild)"].format(guild=plasmo_guild))
 
-
         if db_result[0][4] == 'True':
             for _role in db_result[0][6:]:
                 try:
@@ -95,14 +90,18 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
     try:
         # Синхронизация ника
         if db_result[0][5] == 'True' \
-                and user_plasmo.display_name is not None and member.display_name != user_plasmo.display_name:
+                and user_plasmo.display_name is not None \
+                and member.display_name != user_plasmo.display_name:
             await member.edit(nick=user_plasmo.display_name)
     except Exception as e:
         if not do_not_reply:
             await ctx.send(texts["missingPermissions"])  # У бота нет прав на смену ника peepoSad
-        print('Exception:', e)
-        await log(f'** {member.guild} ** {e}')
-        return None
+        if member.id == member.guild.owner_id:
+            pass
+        else:
+            print('Exception:', e)
+            await log(f'** {member.guild} ** {e}')
+            return None
 
     #  Синхронизация ролей
     if db_result[0][4] == 'True':
@@ -114,7 +113,13 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
             'fusion': db_result[0][7],
             'helper': db_result[0][8],
         }
-        if db_result[0][3] == 'RP':
+        if db_result[0][3] == 'FRP':
+            db_roles = {
+                'player': db_result[0][6],
+                'fusion': db_result[0][7],
+            }
+            plasmo_roles = frp
+        elif db_result[0][3] == 'RP':
             plasmo_roles = rp
             db_roles = {
                 'player': db_result[0][6],
@@ -149,7 +154,7 @@ async def sync(ctx=None, member: discord.Member = None, do_not_reply=False):
 @slash.slash(name='settings', description='Выводит настройки Plasmo Sync в чат')
 async def settings(ctx):
     if (not ctx.author.guild_permissions.manage_nicknames or not ctx.author.guild_permissions.manage_roles) \
-            and not ctx.author.id in admins:
+            and ctx.author.id not in admins:
         return False
     print('Settings:', ctx.guild)
     result = cursor.execute(f'''SELECT * FROM servers WHERE guild_id = {ctx.guild.id}''').fetchall()
@@ -230,32 +235,32 @@ all_roles = [
         required=True,
         choices=[
             create_choice(
-                name='Игрок',
+                name='Игрок (PR / SMP / FRP)',
                 value='player'
             ),
             create_choice(
-                name='Fusion',
+                name='Fusion (PR / SMP / FRP)',
                 value='fusion'
             ),
             create_choice(
-                name='Интерпол / Хелпер',
+                name='Интерпол / Хелпер (PR / SMP)',
                 value='helper'
             ),
             create_choice(
-                name='Банкир (PRP)',
+                name='Банкир (RP)',
                 value='banker',
 
             ),
             create_choice(
-                name='Член Совета Глав МКО (PRP)',
+                name='Член Совета Глав МКО (RP)',
                 value='mko_head'
             ),
             create_choice(
-                name='Помощник Совета Глав (PRP)',
+                name='Помощник Совета Глав (RP)',
                 value='mko_helper'
             ),
             create_choice(
-                name='Участник Совета МКО (PRP)',
+                name='Участник Совета МКО (RP)',
                 value='mko_member'
             ),
         ])]
@@ -316,6 +321,10 @@ async def remrole(ctx, rolename):
                          create_choice(
                              name='Plasmo SMP',
                              value='SMP'
+                         ),
+                         create_choice(
+                             name='Plasmo FRP',
+                             value='FRP'
                          ),
                      ])])
 async def setdonor(ctx, donor: str):
@@ -482,6 +491,18 @@ async def on_ready():
         smp_player = smp_guild.get_role(smp['player'])
         smp_helper = smp_guild.get_role(smp['helper'])
 
+    global frp_guild, frp_fusion, frp_player, frp_error
+    frp_guild = bot.get_guild(frp['id'])
+
+    if frp_guild is None:
+        frp_error = True
+        frp_fusion = None
+        frp_player = None
+    else:
+        frp_error = False
+        frp_fusion = frp_guild.get_role(frp['fusion'])
+        frp_player = frp_guild.get_role(frp['player'])
+
     global cursor, conn
     conn = sqlite3.connect(config['db'])
     cursor = conn.cursor()
@@ -494,6 +515,8 @@ async def on_ready():
     await log(f'{smp_guild} - {texts["connected"] if not smp_error else texts["connection err"]} (as SMP)')
     print(f'{rp_guild} - {texts["connected"] if not rp_error else texts["connection err"]} (as RP)')
     await log(f'{rp_guild} - {texts["connected"] if not rp_error else texts["connection err"]} (as RP)')
+    print(f'{frp_guild} - {texts["connected"] if not frp_error else texts["connection err"]} (as FRP)')
+    await log(f'{frp_guild} - {texts["connected"] if not frp_error else texts["connection err"]} (as FRP)')
     print(f'Located at {len(all_guilds)} servers(including donors).')
     await log(f'Located at **{len(all_guilds)}** servers.')
 
@@ -505,12 +528,16 @@ async def on_ready():
             await log(f'Fixed (downtime join) - {guild}')
             await on_guild_join(guild)
         guilds += f'\n **[GUILD]** {guild}'
-    await log(guilds)
+    if len(guilds) >= 2000:
+        await log(guilds[:1999])
+        await log(guilds[2000:])
+    else:
+        await log(guilds)
 
 
 @bot.event
 async def on_guild_join(guild):
-    if guild == rp_guild or guild == smp_guild:
+    if guild == rp_guild or guild == smp_guild or guild == frp_guild:
         print(f'Joined a PLASMO guild {guild.name}')
         await log(f'Joined a PLASMO guild {guild.name}')
         return None
@@ -569,7 +596,7 @@ async def on_member_ban(guild, _user):
 @bot.event
 async def on_member_join(member):
     try:
-        if member.guild == rp_guild or member.guild == smp_guild:
+        if member.guild in [rp_guild, smp_guild, frp_guild]:
             return None
         db_result = cursor.execute(f''' SELECT on_join FROM servers WHERE guild_id = {member.guild.id}''').fetchone()
         if db_result is not None and db_result[0] == 'True':
@@ -594,7 +621,7 @@ async def on_command_error(ctx, error):
                 f'{config["prefix"]}setrole',
                 f'{config["prefix"]}setdonor']
         raw = ctx.message.content
-        if raw.split()[0] in cmds and ctx.guild != rp_guild and ctx.guild != smp_guild:
+        if raw.split()[0] in cmds and ctx.guild not in [rp_guild, smp_guild, frp_guild]:
             await ctx.send('** ⚠️ Plasmo Sync больше не поддерживает такие комманды, подробнее на вики ** '
                            'https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a')
 
