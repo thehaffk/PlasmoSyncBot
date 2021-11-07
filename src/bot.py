@@ -530,14 +530,14 @@ async def on_ready():
         guilds += f'\n **[GUILD]** {guild}'
     if len(guilds) >= 2000:
         await log(guilds[:1999])
-        await log(guilds[2000:])
+        await log(guilds[1999:])
     else:
         await log(guilds)
 
 
 @bot.event
 async def on_guild_join(guild):
-    if guild == rp_guild or guild == smp_guild or guild == frp_guild:
+    if guild in [rp_guild, smp_guild, frp_guild]:
         print(f'Joined a PLASMO guild {guild.name}')
         await log(f'Joined a PLASMO guild {guild.name}')
         return None
@@ -555,7 +555,7 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_member_update(before, after):
-    if (before.guild != rp_guild and before.guild != smp_guild) or (before.roles == after.roles and
+    if (before.guild not in [rp_guild, smp_guild, frp_guild]) or (before.roles == after.roles and
                                                                     before.display_name == after.display_name):
         return None
 
@@ -568,7 +568,7 @@ async def on_member_update(before, after):
 
 @bot.event
 async def on_member_remove(member):
-    if member.guild != rp_guild and member.guild != smp_guild:
+    if member.guild not in [rp_guild, smp_guild, frp_guild]:
         return None
 
     for guild in bot.guilds:
@@ -583,7 +583,7 @@ async def on_member_remove(member):
 @bot.event
 async def on_member_ban(guild, _user):
     await log(f'{_user.mention}({_user}) got banned on {guild}')
-    if guild != rp_guild and guild != smp_guild:
+    if guild not in [rp_guild, smp_guild, frp_guild]:
         return None
 
     for guild in bot.guilds:
