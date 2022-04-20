@@ -27,3 +27,5 @@ class PublicCommands(commands.Cog):
 
 def setup(client):
     client.add_cog(PublicCommands(client))
+    logger.info("Loaded PublicCommands")
+

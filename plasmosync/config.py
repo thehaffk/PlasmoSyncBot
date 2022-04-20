@@ -157,7 +157,7 @@ class PlasmoRP:
     settings.append(sync_roles)
     use_api = Setting(
         alias="use_api",
-        name="Синхронизировать даже если нет на доноре",
+        name="Синхронизировать через API",
         description="Использовать API, чтобы получить роли и ники игроков, которых нет на сервере доноре",
         default=True,
         verified_servers_only=True,

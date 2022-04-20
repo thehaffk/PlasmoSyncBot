@@ -1,7 +1,8 @@
+[![wakatime](https://wakatime.com/badge/user/fbdc1559-14df-4e03-b6ed-ae7a263ae76f/project/6cc185d5-4ab7-4c0c-9616-e37488899024.svg)](https://wakatime.com/badge/user/fbdc1559-14df-4e03-b6ed-ae7a263ae76f/project/6cc185d5-4ab7-4c0c-9616-e37488899024)
+
 Plasmo Sync 2.0.0
 
-- Plasmo FRP больше не поддерживается (до 2.1.0)
-- Sync это теперь два бота: Plasmo Sync RP и Plasmo Sync SMP
+- Sync это теперь три бота: Plasmo Sync RP, Plasmo Sync SMP и Plasmo Sync FRP
 - Параметр "синхронизировать при входе" удален
 - Теперь все настройки в одной команде (кроме установки ролей)
 - Команды переведены на русский

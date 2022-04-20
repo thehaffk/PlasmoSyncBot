@@ -6,7 +6,7 @@ import aiosqlite
 from plasmosync import settings
 
 
-async def setup(path="plasmosync/data.db") -> bool:
+async def setup(path="./plasmosync/data.db") -> bool:
     """
     Check if database is ready for use, updates columns if not
     """

@@ -31,7 +31,6 @@ class PlasmoSync(commands.Bot):
         _intents.dm_messages = True
         _intents.emojis_and_stickers = True
         _intents.guilds = True
-        _intents.message_content = True
 
         return cls(
             owner_ids=[737501414141591594, 222718720127139840, 191836876980748298],

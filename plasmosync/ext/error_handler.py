@@ -90,3 +90,5 @@ class ErrorHandler(commands.Cog):
 
 def setup(client):
     client.add_cog(ErrorHandler(client))
+    logger.info("Loaded ErrorHandler")
+

@@ -30,3 +30,4 @@ class AdminTools(commands.Cog):
 
 def setup(client):
     client.add_cog(AdminTools(client))
+    logger.info("Loaded AdminTools")
