@@ -47,13 +47,13 @@ class PlasmoRP:
     Config for Plasmo RP, discord guild, api, settings
     """
 
-    guild_discord_id = 828683007635488809
+    guild_discord_id = 828683007635488809  # 828683007635488809
     api_base_url = "https://rp.plo.su/api"
 
     roles = []
 
     player_role = PlasmoRole(
-        discord_id=746628733452025866,
+        discord_id=943941965655973888,  # 746628733452025866,
         name="Игрок",
         alias="player",
         api_alias="player",
@@ -61,7 +61,7 @@ class PlasmoRP:
     )
     roles.append(player_role)
     fusion_role = PlasmoRole(
-        discord_id=751722994170331136,
+        discord_id=943942028054650881,  # 751722994170331136,
         name="Fusion",
         alias="fusion",
         api_alias="support",
@@ -69,7 +69,7 @@ class PlasmoRP:
     )
     roles.append(fusion_role)
     interpol_role = PlasmoRole(
-        discord_id=751723033357451335,
+        discord_id=943942071906078831,  # 751723033357451335,
         name="Интерпол",
         alias="interpol",
         api_alias="helper",
@@ -77,7 +77,7 @@ class PlasmoRP:
     )
     roles.append(interpol_role)
     admin_role = PlasmoRole(
-        discord_id=704364763248984145,
+        discord_id=943942125198905414,  # 704364763248984145,
         name="Администрация",
         alias="admin",
         api_alias="admin",
@@ -86,7 +86,7 @@ class PlasmoRP:
     roles.append(admin_role)
 
     support_role = PlasmoRole(
-        discord_id=872899130270294046,
+        discord_id=943942163400626257,  # 872899130270294046,
         name="Поддержка",
         alias="support",
         api_alias=None,
@@ -102,7 +102,7 @@ class PlasmoRP:
     )
     roles.append(banker_role)
     mko_member_role = PlasmoRole(
-        discord_id=844507728671277106,
+        discord_id=943942205129756673,  # 844507728671277106,
         name="Участник совета МКО",
         alias="mko_member",
         api_alias=None,
@@ -110,7 +110,7 @@ class PlasmoRP:
     )
     roles.append(mko_member_role)
     mko_helper_role = PlasmoRole(
-        discord_id=826366703591620618,
+        discord_id=943942311551844442,  # 826366703591620618,
         name="Помощник совета глав",
         alias="mko_helper",
         api_alias="soviet-helper",
@@ -118,7 +118,7 @@ class PlasmoRP:
     )
     roles.append(mko_helper_role)
     mko_head_role = PlasmoRole(
-        discord_id=810492714235723777,
+        discord_id=943942349178937344,  # 810492714235723777,
         name="Член совета глав МКО",
         alias="mko_head",
         api_alias="supa_helper",
@@ -126,7 +126,7 @@ class PlasmoRP:
     )
     roles.append(mko_head_role)
     president_role = PlasmoRole(
-        discord_id=880065048792420403,
+        discord_id=948303445281108038,  # 880065048792420403,
         name="Президент МКО",
         alias="president",
         api_alias="president",
@@ -157,7 +157,7 @@ class PlasmoRP:
     settings.append(sync_roles)
     use_api = Setting(
         alias="use_api",
-        name="Синхронизировать через API",
+        name="Использовать API",
         description="Использовать API, чтобы получить роли и ники игроков, которых нет на сервере доноре",
         default=True,
         verified_servers_only=True,
