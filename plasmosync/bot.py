@@ -1,5 +1,4 @@
 import logging
-import os
 
 import disnake
 from disnake.ext import commands
@@ -40,10 +39,8 @@ class PlasmoSync(commands.Bot):
             sync_permissions=True,
             command_prefix=commands.when_mentioned,
             allowed_mentions=disnake.AllowedMentions(everyone=False),
-            activity=disnake.Game(name="Synchronizes nicknames and roles with Plasmo,"
-                                       " made by Plasmo R&D [howkawgew]"),
-
+            activity=disnake.Game(
+                name="Synchronizes nicknames and roles with Plasmo,"
+                " made by Plasmo R&D [howkawgew]"
+            ),
         )
-
-
-

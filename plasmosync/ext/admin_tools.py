@@ -1,11 +1,7 @@
 import logging
-import sqlite3
 
 import disnake
-from aiohttp import ClientSession
 from disnake.ext import commands
-
-from plasmosync import settings, config
 
 logger = logging.getLogger(__name__)
 

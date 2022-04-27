@@ -1,13 +1,9 @@
 import logging
-import sqlite3
 
 import disnake
-from aiohttp import ClientSession
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 from disnake.ext.commands import user_command
-
-from plasmosync import settings, config
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +11,7 @@ logger = logging.getLogger(__name__)
 class PublicCommands(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
+        self.core = None
 
     # TODO: /sync user
     # TODO: /sync guild
@@ -56,14 +53,29 @@ class PublicCommands(commands.Cog):
                 ),
             )
         else:
-            await self.bot.get_cog("Synchronization").sync(member)
+            sync_status, error_messages = await self.core.sync(member)
+
+        if sync_status:
+            synced_embed = disnake.Embed(title=f"Результат синхронизации - {user} | {user.guild}", color=disnake.Color.dark_green())
+            synced_embed.add_field(
+                name="Статус", value="✅ Синхронизация прошла успешно"
+            )
+        else:
+            synced_embed = disnake.Embed(title=f"Результат синхронизации - {user} | {user.guild}", color=disnake.Color.dark_red())
+            error_messages = "\n❌".join(error_messages)
+            synced_embed.add_field(
+                name="Синхронизация прошла c ошибками, проверьте настройки бота:",
+                value=error_messages,
+            )
 
         return await inter.edit_original_message(
-            embed=disnake.Embed(
-                title="Synced", color=disnake.Color.dark_green()
-            ),
+            embed=synced_embed,
         )
 
+    async def cog_load(self) -> None:
+        self.core = self.bot.get_cog("SyncCore")
+        if self.core is None:
+            raise ModuleNotFoundError("Could not get sync core")
 
 
 def setup(client):
