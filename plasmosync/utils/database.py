@@ -9,8 +9,8 @@ async def setup(path="./plasmosync/data.db") -> bool:
     Check if database is ready for use, updates columns if not
     """
     logger.info("Setting up database...")
-    print(path)
     ...  # TODO
+    return True
 
 
 async def is_guild_verified(guild_id: int) -> bool:
@@ -26,7 +26,7 @@ async def get_guild_switches(guild_id: int) -> Dict[str, bool]:
     :param guild_id: id of guild
     :return:
     """
-    # TODO
+    ...  # TODO
     logger.debug("Getting switches for %s", guild_id)
     # Fake data
     return {
@@ -46,6 +46,7 @@ async def get_guild_roles(guild_id: int) -> Dict[str, int]:
         "player": 966785796902363189,
         "fusion": 966785796902363190,
         "interpol": 966785796902363192,
+        "banker": None,
         "admin": 966785796927524897,
         "support": 966785796902363191,
         "mko_helper": 966785796902363193,

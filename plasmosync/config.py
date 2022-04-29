@@ -18,6 +18,9 @@ DEBUG = True
 # enabled_emoji = "<:plasmosyncenabled:944002031780233216>"
 # disabled_emoji = "<:plasmosyncdisabled:944002049752858704>"
 
+WIKI_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+ABOUT_VERIFIED_SERVERS_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
 
 @dataclass(frozen=True)
 class PlasmoRole:
@@ -30,6 +33,12 @@ class PlasmoRole:
     alias: str
     api_alias: Optional[str]
     verified_servers_only: bool
+
+
+class Emojis:
+    verified = r"<:verified:969672029877977119>"
+    enabled = r"<:enabled:969672429981016084>"
+    disabled = r"<:disabled:969672065160474684>"
 
 
 @dataclass(frozen=True)
@@ -45,6 +54,8 @@ class PlasmoRP:
     """
     Config for Plasmo RP, discord guild, api, settings
     """
+
+    name = "Plasmo RP"
 
     guild_discord_id = 828683007635488809 if DEBUG else 828683007635488809
     api_base_url = "https://rp.plo.su/api"
@@ -140,24 +151,24 @@ class PlasmoRP:
     settings = []
     sync_nicknames = Setting(
         alias="sync_nicknames",
-        name="Синхронизировать ники",
-        description="Синхронизировать ники всех пользователей на сервере",
+        name="Синхронизация ников",
+        description="**Plasmo Sync** будет синхронизировать ники всех пользователей с Plasmo RP",
         default=False,
         verified_servers_only=False,
     )
     settings.append(sync_nicknames)
     sync_roles = Setting(
         alias="sync_roles",
-        name="Синхронизировать роли",
-        description="Синхронизировать роли всех пользователей на сервере",
+        name="Синхронизация ролей",
+        description="**Plasmo Sync** будет синхронизировать установленные роли всех пользователей с Plasmo RP",
         default=False,
         verified_servers_only=False,
     )
     settings.append(sync_roles)
     use_api = Setting(
         alias="use_api",
-        name="Использовать API",
-        description="Использовать API, чтобы получить роли и ники игроков, которых нет на сервере доноре",
+        name="Использование API",
+        description="**Plasmo Sync** будет синхронизировать ники пользователей, даже если их нет на Plasmo RP",
         default=True,
         verified_servers_only=True,
     )
@@ -165,7 +176,7 @@ class PlasmoRP:
     whitelist = Setting(
         alias="whitelist",
         name="Вайтлист игроков",
-        description="Не позволять пользователям без роли игрока заходить на сервер",
+        description='**Plasmo Sync** будет кикать пользователей с сервера если у них нет роли "Игрок" на Plasmo RP',
         default=False,
         verified_servers_only=True,
     )
@@ -174,7 +185,9 @@ class PlasmoRP:
     sync_bans = Setting(
         alias="sync_bans",
         name="Синхронизация банов",
-        description="Не позволять пользователям без роли игрока заходить на сервер",
+        description="**Plasmo Sync** будет банить всех участников сервера, которые забанены на Plasmo RP."
+        " Функция разбанов может работать нестабильно"
+        " - пишите в [поддержку](https://discord.gg/snD9Zcys5Y) если найдете баг",
         default=False,
         verified_servers_only=True,
     )
@@ -190,6 +203,8 @@ class PlasmoSMP:
     Config for Plasmo SMP, discord guild, api, settings
     """
 
+    name = "Plasmo SMP"
+
     # TODO: This
     ...
 
@@ -199,19 +214,23 @@ class PlasmoFRP:
     Config for Plasmo FRP, discord guild, api, settings
     """
 
+    name = "Plasmo FRP"
+
     # TODO: This
     ...
 
 
 class DevServer:
     """
-    Config for digital drugs (howkawgew's server) guild
+    Config for digital drugs technologies (howkawgew's server) guild
     """
 
-    id = 828683007635488809
+    id = 966785796902363188
 
-    bot_logs_channel_id = 943953710856429588
-    errors_channel_id = 965700806693257216
+    invite_url = "https://discord.gg/snD9Zcys5Y"
+
+    bot_logs_channel_id = 969713902831173652
+    errors_channel_id = 969713902831173652
 
     """
     default_settings_dict = {

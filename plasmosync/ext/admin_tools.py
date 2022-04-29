@@ -22,6 +22,7 @@ class AdminTools(commands.Cog):
     # TODO: /guild force-sync <id>
     # TODO: /force-sync-all-guilds
     # TODO: /force-update-ban <userid>
+    # TODO: on_ready logger
 
 
 def setup(client):

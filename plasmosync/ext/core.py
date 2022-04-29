@@ -202,6 +202,8 @@ class SyncCore(commands.Cog):
         :return: True if successfully synced, False if there were errors during syncing
 
         """
+        if isinstance(user, disnake.Member) and user.bot:
+            return True, []
 
         donor_config = settings.DONOR
         if user_guild is None:
@@ -303,7 +305,7 @@ class SyncCore(commands.Cog):
 
 def setup(bot):
     """
-    Setup function?
+    Disnake setup function
     :param bot: discord bot client
     """
     bot.add_cog(SyncCore(bot))
