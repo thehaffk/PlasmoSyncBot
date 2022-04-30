@@ -3,7 +3,7 @@ from typing import Union
 import disnake
 
 from plasmosync.utils.database import get_guild_roles, remove_role_by_id
-from ..config import PlasmoRP, PlasmoSMP
+from plasmosync.config import PlasmoRP, PlasmoSMP
 
 
 async def get_roles_difference(

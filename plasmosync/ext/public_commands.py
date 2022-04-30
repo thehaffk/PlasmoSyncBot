@@ -13,27 +13,77 @@ logger = logging.getLogger(__name__)
 
 
 class SettingButton(disnake.ui.Button["GuildSwitch"]):
-    def __init__(self, setting_alias: str, disabled=False, no_access=False, row=0):
+    def __init__(
+        self, setting_alias: str, switch_position=False, no_access=False, row=0
+    ):
         self.switch: config.Setting = settings.DONOR.settings_by_aliases[setting_alias]
-        self.switch_status = not disabled
+        # privileged settings may be enabled
+        # but guild may be not verified at same time,
+        # they don't work without verification, so I need to disable them
+        self.switch_status = switch_position and not no_access
+
         if self.switch_status:
             style = disnake.ButtonStyle.success
         else:
             style = disnake.ButtonStyle.secondary
 
         super().__init__(
-            style=style, label=self.switch.name, row=row, disabled=no_access
+            style=style,
+            label=self.switch.name,
+            row=row,
+            disabled=no_access,
+            custom_id=setting_alias,
         )
 
-    async def callback(self, interaction: disnake.MessageInteraction):
-        ...
+    async def callback(self, inter: disnake.MessageInteraction):
+        view: SettingsView = self.view
+        if not inter.author.guild_permissions.manage_guild:
+            return await inter.send(
+                embed=disnake.Embed(
+                    title="Не хватает прав",
+                    description="Вам нужно иметь пермишен `manage_server` для изменения настроек Plasmo Sync",
+                    color=disnake.Color.dark_red(),
+                )
+            )
+        await inter.response.defer(ephemeral=True)
+
+        self.switch_status = not self.switch_status
+        if self.switch_status:
+            self.style = disnake.ButtonStyle.success
+        else:
+            self.style = disnake.ButtonStyle.secondary
+
+
+
+        return await inter.edit_original_message(view=view)
+
 
 
 class SettingsView(disnake.ui.View):
     children: List[SettingButton]
 
+    def __init__(
+        self,
+        inter: disnake.Interaction,
+        local_settings: dict[str, bool],
+        guild_is_verified=False,
+    ):
+        super().__init__(timeout=600)
+        for index, setting in enumerate(settings.DONOR.settings):
+            self.add_item(
+                SettingButton(
+                    setting_alias=setting.alias,
+                    switch_position=local_settings.get(setting.alias, setting.default),
+                    no_access=(not guild_is_verified)
+                    if setting.verified_servers_only
+                    else False,
+                    row=index // 5,
+                )
+            )
+
 
 async def get_settings_embeds(guild: disnake.Guild) -> List[disnake.Embed]:
+    # TODO: Add guild is verified as a parameter to avoid second database call
     guild_is_verified = await database.is_guild_verified(guild.id)
     guild_swithes = await database.get_guild_switches(guild.id)
 
@@ -44,24 +94,26 @@ async def get_settings_embeds(guild: disnake.Guild) -> List[disnake.Embed]:
     )
 
     inaccessible_switches = []
-    for switch_alias, value in guild_swithes.items():
-        switch = settings.DONOR.settings_by_aliases[switch_alias]
-        if guild_is_verified if switch.verified_servers_only else True:
+    for setting in settings.DONOR.settings:
+        local_setting = guild_swithes.get(setting.alias, setting.default)
+        if guild_is_verified if setting.verified_servers_only else True:
             settings_embed.add_field(
-                name=(config.Emojis.enabled if value else config.Emojis.disabled)
+                name=(
+                    config.Emojis.enabled if local_setting else config.Emojis.disabled
+                )
                 + " "
-                + switch.name,
-                value=switch.description,
+                + setting.name,
+                value=setting.description,
                 inline=False,
             )
         else:
-            inaccessible_switches.append(switch)
+            inaccessible_switches.append(setting)
     if not guild_is_verified and len(inaccessible_switches) > 0:
         settings_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Настройки {', '.join([('**' + switch.name + '**') for switch in inaccessible_switches])}"
             f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
-            inline=False
+            inline=False,
         )
 
     roles_embed = disnake.Embed(
@@ -74,7 +126,9 @@ async def get_settings_embeds(guild: disnake.Guild) -> List[disnake.Embed]:
         if guild_is_verified if config_role.verified_servers_only else True:
             roles_embed.add_field(
                 name=config_role.name,
-                value=f"<@&{local_role_id}>" if local_role_id is not None else "Not specified",
+                value=f"<@&{local_role_id}>"
+                if local_role_id is not None
+                else "Not specified",
                 inline=True,
             )
         else:
@@ -84,8 +138,8 @@ async def get_settings_embeds(guild: disnake.Guild) -> List[disnake.Embed]:
         roles_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Роли {', '.join([('**' + role.name + '**') for role in inaccessible_roles])}"
-                  f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
-            inline=False
+            f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
+            inline=False,
         )
 
     return [settings_embed, roles_embed]
@@ -98,7 +152,6 @@ class PublicCommands(commands.Cog):
 
     # TODO: /sync user
     # TODO: /sync guild
-    # TODO: /settings
     # TODO: /set switch <name> <bool>
     # TODO: /set role <name> <role>
     # TODO: /reset role
@@ -150,12 +203,22 @@ class PublicCommands(commands.Cog):
             embed=synced_embed,
         )
 
+    @commands.guild_only()
     @commands.slash_command()
     async def settings(self, inter: ApplicationCommandInteraction):
         await inter.response.defer(with_message=False, ephemeral=True)
+        buttons = []
+
+        if inter.author.guild_permissions.manage_guild:
+            local_settings = await database.get_guild_switches(inter.guild.id)
+            guild_is_verified = await database.is_guild_verified(inter.guild.id)
+            view = SettingsView(inter, local_settings, guild_is_verified)
+        else:
+            view = None
 
         await inter.edit_original_message(
-            embeds=(await get_settings_embeds(guild=inter.guild))
+            embeds=(await get_settings_embeds(guild=inter.guild)),
+            view=view,
         )
 
     async def cog_load(self) -> None:

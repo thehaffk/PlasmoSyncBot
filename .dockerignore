@@ -1,0 +1,12 @@
+### Python template
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Project Settings
+.idea/
+
+# Environments
+.env
+venv/
+
+

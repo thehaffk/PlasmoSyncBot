@@ -176,7 +176,7 @@ class PlasmoRP:
     whitelist = Setting(
         alias="whitelist",
         name="Вайтлист игроков",
-        description='**Plasmo Sync** будет кикать пользователей с сервера если у них нет роли "Игрок" на Plasmo RP',
+        description='**Plasmo Sync** будет кикать пользователей с сервера, если у них нет роли "Игрок" на Plasmo RP',
         default=False,
         verified_servers_only=True,
     )
@@ -187,7 +187,7 @@ class PlasmoRP:
         name="Синхронизация банов",
         description="**Plasmo Sync** будет банить всех участников сервера, которые забанены на Plasmo RP."
         " Функция разбанов может работать нестабильно"
-        " - пишите в [поддержку](https://discord.gg/snD9Zcys5Y) если найдете баг",
+        " - пишите в [поддержку](https://discord.gg/snD9Zcys5Y), если найдете баг",
         default=False,
         verified_servers_only=True,
     )

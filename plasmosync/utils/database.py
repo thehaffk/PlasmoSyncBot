@@ -17,7 +17,7 @@ async def is_guild_verified(guild_id: int) -> bool:
     # TODO
 
     # Fake data
-    return True
+    return False
 
 
 async def get_guild_switches(guild_id: int) -> Dict[str, bool]:
