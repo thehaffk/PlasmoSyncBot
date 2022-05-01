@@ -3,7 +3,7 @@ import logging
 import disnake
 from disnake.ext import commands
 
-from plasmosync import settings
+from plasmosync import settings, config
 
 logger = logging.getLogger()
 
@@ -32,7 +32,7 @@ class PlasmoSync(commands.Bot):
         _intents.guilds = True
 
         return cls(
-            owner_ids=[737501414141591594, 222718720127139840, 191836876980748298],
+            owner_ids=config.OWNERS,
             status=disnake.Status.do_not_disturb,
             intents=_intents,
             sync_commands=True,

@@ -3,6 +3,8 @@ from typing import Optional, Dict
 
 logger = logging.getLogger(__name__)
 
+verified = False  # Testing, TODO: remove
+
 
 async def setup(path="./plasmosync/data.db") -> bool:
     """
@@ -14,10 +16,9 @@ async def setup(path="./plasmosync/data.db") -> bool:
 
 
 async def is_guild_verified(guild_id: int) -> bool:
-    # TODO
-
-    # Fake data
-    return False
+    logger.debug("is_guild_verified was called with %s", guild_id)
+    # Just for testing, TODO: This
+    return verified
 
 
 async def get_guild_switches(guild_id: int) -> Dict[str, bool]:
@@ -31,7 +32,7 @@ async def get_guild_switches(guild_id: int) -> Dict[str, bool]:
     # Fake data
     return {
         "sync_nicknames": True,
-        "sync_roles": True,
+        "sync_roles": False,
         "use_api": True,
         "whitelist": False,
         "sync_bans": True,
@@ -57,14 +58,19 @@ async def get_guild_roles(guild_id: int) -> Dict[str, int]:
 
 async def verify_guild(guild_id: int) -> bool:  # TODO: Verify guild
     logger.info("Verifying %s guild", guild_id)
-    ...
+
+    # Just for testing, TODO: This
+
+    global verified
+    verified = True
 
 
 async def unverify_guild(guild_id: int) -> bool:
     logger.debug("Unverifying %s guild", guild_id)
 
-    ...  # TODO
-    return True
+    # Just for testing TODO: This
+    global verified
+    verified = False
 
 
 async def set_switch(guild_id: int, alias: str, value: bool) -> bool:

@@ -6,10 +6,11 @@ from dataclasses import dataclass
 from typing import Optional
 
 DEBUG = True
+OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
 
 
-# WIKI_LINK = "https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a"  # TODO: Add different wikis to \
-# different servers
+# WIKI_LINK = "https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a"  # TODO: Add different wikis to
+#  different servers
 # rp_api_link = "https://rp.plo.su/api/"
 # verified_text = "<:plasmoverified:943963401607069738> Verified"
 # verified_description = (

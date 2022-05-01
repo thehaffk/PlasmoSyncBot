@@ -16,7 +16,20 @@ class SettingButton(disnake.ui.Button["GuildSwitch"]):
     def __init__(
         self, setting_alias: str, switch_position=False, no_access=False, row=0
     ):
-        self.switch: config.Setting = settings.DONOR.settings_by_aliases[setting_alias]
+
+        if setting_alias == "is_verified":
+            self.switch = config.Setting(
+                alias="is_verified",
+                name="Верификация",
+                description="",
+                default=False,
+                verified_servers_only=False,
+            )
+        else:
+            self.switch: config.Setting = settings.DONOR.settings_by_aliases.get(
+                setting_alias, None
+            )
+
         # privileged settings may be enabled
         # but guild may be not verified at same time,
         # they don't work without verification, so I need to disable them
@@ -36,27 +49,52 @@ class SettingButton(disnake.ui.Button["GuildSwitch"]):
         )
 
     async def callback(self, inter: disnake.MessageInteraction):
-        view: SettingsView = self.view
-        if not inter.author.guild_permissions.manage_guild:
-            return await inter.send(
+        await inter.response.defer(ephemeral=True)
+
+        if (
+            not inter.author.guild_permissions.manage_guild
+            and inter.author.id not in config.OWNERS
+        ):
+            return await inter.edit_original_message(
                 embed=disnake.Embed(
                     title="Не хватает прав",
                     description="Вам нужно иметь пермишен `manage_server` для изменения настроек Plasmo Sync",
                     color=disnake.Color.dark_red(),
                 )
             )
-        await inter.response.defer(ephemeral=True)
 
         self.switch_status = not self.switch_status
+
         if self.switch_status:
             self.style = disnake.ButtonStyle.success
         else:
             self.style = disnake.ButtonStyle.secondary
 
+        if self.switch.alias == "is_verified":
+            if self.switch_status:
+                await database.verify_guild(guild_id=inter.guild_id)
+                guild_is_verified = True
+            else:
+                await database.unverify_guild(guild_id=inter.guild_id)
+                guild_is_verified = False
 
+            self.view.clear_items()
+            self.view.__init__(
+                inter=inter,
+                local_settings=await database.get_guild_switches(inter.guild_id),
+                guild_is_verified=guild_is_verified,
+            )
+        else:
+            await database.set_switch(
+                guild_id=inter.guild_id,
+                alias=self.switch.alias,
+                value=self.switch_status,
+            )
 
-        return await inter.edit_original_message(view=view)
-
+        return await inter.edit_original_message(
+            embeds=await get_settings_embeds(inter.guild, author_is_admin=True),
+            view=self.view,
+        )
 
 
 class SettingsView(disnake.ui.View):
@@ -65,7 +103,7 @@ class SettingsView(disnake.ui.View):
     def __init__(
         self,
         inter: disnake.Interaction,
-        local_settings: dict[str, bool],
+        local_settings: dict[str, bool] = None,
         guild_is_verified=False,
     ):
         super().__init__(timeout=600)
@@ -80,12 +118,27 @@ class SettingsView(disnake.ui.View):
                     row=index // 5,
                 )
             )
+        if inter.author.id in config.OWNERS:
+            self.add_item(
+                SettingButton(
+                    setting_alias="is_verified",
+                    switch_position=guild_is_verified,
+                    no_access=False,
+                    row=(len(settings.DONOR.settings) + 1) // 5,
+                )
+            )
 
 
-async def get_settings_embeds(guild: disnake.Guild) -> List[disnake.Embed]:
-    # TODO: Add guild is verified as a parameter to avoid second database call
-    guild_is_verified = await database.is_guild_verified(guild.id)
-    guild_swithes = await database.get_guild_switches(guild.id)
+async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Embed]:
+    # Using **keyword arguments to avoid extra database call
+    guild_is_verified = kwargs.get(
+        "guild_is_verified", await database.is_guild_verified(guild.id)
+    )
+    # "server is not verified" is kinda annoyning and useless unless you are guild admin
+    author_is_admin = kwargs.get("author_is_admin", False)
+    guild_swithes = kwargs.get(
+        "guild_switches", await database.get_guild_switches(guild.id)
+    )
 
     settings_embed = disnake.Embed(
         title=f"Локальные настройки Plasmo Sync |"
@@ -108,7 +161,7 @@ async def get_settings_embeds(guild: disnake.Guild) -> List[disnake.Embed]:
             )
         else:
             inaccessible_switches.append(setting)
-    if not guild_is_verified and len(inaccessible_switches) > 0:
+    if author_is_admin and not guild_is_verified and len(inaccessible_switches) > 0:
         settings_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Настройки {', '.join([('**' + switch.name + '**') for switch in inaccessible_switches])}"
@@ -120,21 +173,31 @@ async def get_settings_embeds(guild: disnake.Guild) -> List[disnake.Embed]:
         color=disnake.Color.dark_green(),
     )
     inaccessible_roles = []
-    guild_roles = await database.get_guild_roles(guild.id)
-    for role_alias, local_role_id in guild_roles.items():
-        config_role = settings.DONOR.roles_by_aliases[role_alias]
-        if guild_is_verified if config_role.verified_servers_only else True:
-            roles_embed.add_field(
-                name=config_role.name,
-                value=f"<@&{local_role_id}>"
-                if local_role_id is not None
-                else "Not specified",
-                inline=True,
+    if guild_swithes.get(settings.DONOR.sync_roles.alias, False):
+        guild_roles = await database.get_guild_roles(guild.id)
+        for role_alias, local_role_id in guild_roles.items():
+            config_role = settings.DONOR.roles_by_aliases[role_alias]
+            if guild_is_verified if config_role.verified_servers_only else True:
+                roles_embed.add_field(
+                    name=config_role.name,
+                    value=f"<@&{local_role_id}>"
+                    if local_role_id is not None
+                    else "Not specified",
+                    inline=True,
+                )
+            else:
+                inaccessible_roles.append(config_role)
+    else:
+        if author_is_admin:
+            value_text = (
+                f"Нажмите кнопку `{settings.DONOR.sync_roles.name}` чтобы включить"
             )
         else:
-            inaccessible_roles.append(config_role)
+            value_text = "[вы можете пойти нахуй](https://t.me/howkawgew/1090)"
 
-    if not guild_is_verified and len(inaccessible_roles) > 0:
+        roles_embed.add_field(name="☠ Синхронизация ролей отключена", value=value_text)
+
+    if author_is_admin and not guild_is_verified and len(inaccessible_roles) > 0:
         roles_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Роли {', '.join([('**' + role.name + '**') for role in inaccessible_roles])}"
@@ -206,18 +269,30 @@ class PublicCommands(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def settings(self, inter: ApplicationCommandInteraction):
+        """
+        Настройки Plasmo Sync
+        """
         await inter.response.defer(with_message=False, ephemeral=True)
         buttons = []
 
-        if inter.author.guild_permissions.manage_guild:
-            local_settings = await database.get_guild_switches(inter.guild.id)
-            guild_is_verified = await database.is_guild_verified(inter.guild.id)
+        author_is_admin = inter.author.guild_permissions.manage_guild
+        guild_is_verified = await database.is_guild_verified(inter.guild.id)
+        local_settings = await database.get_guild_switches(inter.guild.id)
+
+        if author_is_admin or inter.author.id in config.OWNERS:
             view = SettingsView(inter, local_settings, guild_is_verified)
         else:
             view = None
 
         await inter.edit_original_message(
-            embeds=(await get_settings_embeds(guild=inter.guild)),
+            embeds=(
+                await get_settings_embeds(
+                    guild=inter.guild,
+                    guild_is_verified=guild_is_verified,
+                    author_is_admin=author_is_admin,
+                    guild_switches=local_settings,
+                )
+            ),
             view=view,
         )
 
