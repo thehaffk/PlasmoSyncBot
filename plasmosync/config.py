@@ -42,6 +42,7 @@ class Emojis:
     disabled = r"<:disabled:969672065160474684>"
 
 
+# ALL DONORS MUST HAVE SYNC_ROLES AND SYNC_NICKNAMES SWITCHES
 @dataclass(frozen=True)
 class Setting:
     alias: str

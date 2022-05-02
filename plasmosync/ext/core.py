@@ -36,13 +36,18 @@ class SyncCore(commands.Cog):
             )
             return True, []
         except disnake.Forbidden as error:
-            logger.warning(
+            logger.debug(
                 "Unable to update %s local nickname at %s, error \n %s",
                 user,
                 user.guild,
                 error,
             )
-            return False, [f"Не удалось сменить ник ({user})"]
+            return (
+                False,
+                [f"Не удалось сменить ник ({user})"]
+                if user.id != user.guild.owner_id
+                else [],
+            )
 
     async def _sync_roles(
         self, user: disnake.Member
@@ -76,7 +81,7 @@ class SyncCore(commands.Cog):
             )
             return True, []
         except disnake.Forbidden as error:
-            logger.warning(error)
+            logger.debug(error)
             return False, [f"Не удалось снять/добавить роли ({user})"]
 
     async def _sync_bans(
@@ -103,7 +108,7 @@ class SyncCore(commands.Cog):
                     )
                     return True, []
                 except disnake.Forbidden as error:
-                    logger.warning(
+                    logger.debug(
                         "Unable to ban %s in %s, error \n %s",
                         user,
                         user_guild,
@@ -121,7 +126,7 @@ class SyncCore(commands.Cog):
                     )
                     return True, []
                 except disnake.Forbidden as error:
-                    logger.warning(
+                    logger.debug(
                         "Unable to unban %s in %s, error \n %s",
                         user,
                         user_guild,
@@ -157,7 +162,7 @@ class SyncCore(commands.Cog):
                     or response_json.get("status", False) is False
                     or (userdata := response_json.get("data", None)) is None
                 ):
-                    logger.warning(
+                    logger.debug(
                         "Could not get data from PRP API: %s",
                         response_json,
                     )
@@ -191,7 +196,7 @@ class SyncCore(commands.Cog):
 
     async def sync(
         self,
-        user: Union[disnake.Member, disnake.Object],
+        user: disnake.Member | disnake.Object,
         user_guild: Optional[disnake.Guild] = None,
     ) -> tuple[bool, list[str]] | tuple[bool, list[Any]]:
         """
@@ -210,36 +215,46 @@ class SyncCore(commands.Cog):
             user_guild = user.guild
 
         logger.info("Syncing %s at %s", user, user_guild)
-
         sync_status = True
         sync_errors = []
-        # Checks if user_guild is verified
+
         guild_is_verified: bool = await is_guild_verified(user_guild.id)
-        # Get current user_guild settings, donor user_guild and member object from donor
         guild_settings: Dict[str, bool] = await get_guild_switches(user_guild.id)
         donor_guild = self.bot.get_guild(donor_config.guild_discord_id)
         donor_user: Optional[disnake.Member] = donor_guild.get_member(user.id)
+        user_not_in_guild = user_guild.get_member(user.id) is None
 
         if guild_is_verified:
-            user_not_in_guild = user_guild.get_member(user.id) is None
+            # Sync bans
+            if user_not_in_guild or (
+                donor_user is None
+                and guild_settings.get(
+                    "sync_bans",
+                    False,
+                )
+            ):
+                # TODO: Check bot permissions
+                status, errors = await self._sync_bans(user=user, user_guild=user_guild)
+                sync_errors += errors
+                sync_status = False if status is False else sync_status
+
+            if user_not_in_guild:
+                return sync_status, sync_errors
 
             # Whitelist
-            conditions = [
-                not user_not_in_guild,
-                guild_settings.get("whitelist", False),
-                (
-                    donor_user is None
-                    or donor_config.player_role.discord_id
-                    not in [role.id for role in donor_user.roles]
-                ),
-            ]
-            if all(conditions):
+            if guild_settings.get("whitelist", False) and (
+                donor_user is None
+                or donor_config.player_role.discord_id
+                not in [role.id for role in donor_user.roles]
+            ):
+                # TODO: Check bot permissions
+                user: disnake.Member
                 try:
                     await user.kick(
                         reason="Whitelist is enabled, use /settings to disable"
                     )
                 except disnake.Forbidden as error:
-                    logger.warning(
+                    logger.debug(
                         "Could not kick user %s from %s because of \n %s",
                         user,
                         user.guild,
@@ -247,48 +262,9 @@ class SyncCore(commands.Cog):
                     )
                     sync_status = False
                     sync_errors.append(f"Не удалось кикнуть пользователя ({user})")
-                    # TODO: Log that into dev-error-channel
 
-            # Bans
-            if user_not_in_guild or guild_settings.get(
-                "sync_bans",
-                False,
-            ):
-                status, errors = await self._sync_bans(user=user, user_guild=user_guild)
-
-                sync_errors += errors
-                sync_status = False if status is False else sync_status
-
-                if user_not_in_guild:
-                    return sync_status, sync_errors
-
-        if donor_user is not None:
-            #   Sync roles
-            if guild_settings.get("sync_roles", False):
-                status, errors = await self._sync_roles(user)
-                sync_status = False if status is False else sync_status
-
-                sync_errors += errors
-
-            # sync nicknames
-            if guild_settings.get(
-                "sync_nicknames",
-                False,
-            ):
-                status, errors = await self._sync_nicknames(user)
-                sync_errors += errors
-                sync_status = False if status is False else sync_status
-
-        if guild_is_verified:
-            if guild_settings.get(
-                "sync_bans",
-                False,
-            ):
-                status, errors = await self._sync_bans(user=user, user_guild=user_guild)
-                sync_errors += errors
-                sync_status = False if status is False else sync_status
-
-            if guild_settings.get(
+            # API Sync
+            if donor_user is None and guild_settings.get(
                 "use_api",
                 False,
             ):
@@ -298,7 +274,28 @@ class SyncCore(commands.Cog):
                 sync_errors += api_errors
                 sync_status = False if status is False else sync_status
 
-                return sync_status, sync_errors
+        if user_not_in_guild:
+            return sync_status, sync_errors
+
+        if donor_user is not None:
+            # Sync roles
+            if guild_settings.get("sync_roles", False):
+                # TODO: Check bot permissions
+                status, errors = await self._sync_roles(user)
+                sync_status = False if status is False else sync_status
+
+                sync_errors += errors
+
+            # Sync nicknames
+            if guild_settings.get(
+                "sync_nicknames",
+                False,
+            ):
+                # TODO: Check bot permissions
+
+                status, errors = await self._sync_nicknames(user)
+                sync_errors += errors
+                sync_status = False if status is False else sync_status
 
         return sync_status, sync_errors
 

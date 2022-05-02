@@ -3,6 +3,8 @@ import logging
 import disnake
 from disnake.ext import commands
 
+from plasmosync import settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,6 +27,10 @@ class Listeners(commands.Cog):
     @commands.Cog.listener('on_member_join')
     async def join_handler(self, guild: disnake.Guild, user: disnake.User):
         # TODO
+        if guild.id == settings.DONOR.guild_discord_id:
+            ...
+        else:
+            ...
 
         ...  # if donor - sync on all guilds with sync roles/sync nicknames enabled, else - sync locally
 
@@ -35,6 +41,16 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener('on_member_update')
     async def updates_handler(self, guild: disnake.Guild, user: disnake.User):
+        # TODO
+        ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
+
+    @commands.Cog.listener('on_guild_join')
+    async def ne_guild_handler(self, guild: disnake.Guild, user: disnake.User):
+        # TODO
+        ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
+
+    @commands.Cog.listener('on_guild_leave')
+    async def ne_guild_handler(self, guild: disnake.Guild, user: disnake.User):
         # TODO
         ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
 

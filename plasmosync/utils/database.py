@@ -1,9 +1,9 @@
 import logging
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 logger = logging.getLogger(__name__)
 
-verified = False  # Testing, TODO: remove
+verified = True  # Testing, TODO: remove
 
 
 async def setup(path="./plasmosync/data.db") -> bool:
@@ -17,7 +17,8 @@ async def setup(path="./plasmosync/data.db") -> bool:
 
 async def is_guild_verified(guild_id: int) -> bool:
     logger.debug("is_guild_verified was called with %s", guild_id)
-    # Just for testing, TODO: This
+    # TODO: SELECT is_verified FROM guilds WHERE discord_id = ?
+
     return verified
 
 
@@ -27,12 +28,12 @@ async def get_guild_switches(guild_id: int) -> Dict[str, bool]:
     :param guild_id: id of guild
     :return:
     """
-    ...  # TODO
+    # TODO: SELECT * FROM settings WHERE guild_discord_id = ?
     logger.debug("Getting switches for %s", guild_id)
     # Fake data
     return {
         "sync_nicknames": True,
-        "sync_roles": False,
+        "sync_roles": True,
         "use_api": True,
         "whitelist": False,
         "sync_bans": True,
@@ -40,9 +41,8 @@ async def get_guild_switches(guild_id: int) -> Dict[str, bool]:
 
 
 async def get_guild_roles(guild_id: int) -> Dict[str, int]:
-    # TODO
+    # TODO: SELECT * FROM roles WHERE guild_discord_id = ?
 
-    # Fake data
     return {
         "player": 966785796902363189,
         "fusion": 966785796902363190,
@@ -56,16 +56,64 @@ async def get_guild_roles(guild_id: int) -> Dict[str, int]:
     }
 
 
-async def verify_guild(guild_id: int) -> bool:  # TODO: Verify guild
+async def get_active_guilds() -> List[int]:
+    """
+    Get list of guild_ids where bot is active. Literally all guilds except those where bot is kicked/banned
+    :return: List with guild ids
+    """
+    # TODO: SELECT discord_id FROM GUILDS WHERE is_available = TRUE
+    ...
+
+
+async def set_switch(guild_id: int, alias: str, value: bool) -> bool:
+    """
+    Update local guild settings in bot dabatase
+    :param guild_id: Discord id of local server
+    :param alias: Setting alias
+    :param value: New value
+    :return: Returns new value of switch
+    """
+    logger.debug("Setting switch %s to %s in %s", alias, value, guild_id)
+    # TODO: INSERT INTO settings(guild_discord_id, alias, value) VALUES(?, ?, ?)
+    #   ON CONFLICT(guild_discord_id, alias) DO UPDATE SET role_id=?;
+
+    return value
+
+
+async def set_role(guild_id: int, role_alias: str, value: Optional[int]):
+    ...
+    # TODO: INSERT INTO roles(guild_discord_id, alias, role_id) VALUES(?, ?, ?)
+    #   ON CONFLICT(guild_discord_id, alias) DO UPDATE SET role_id=?;
+
+    logger.debug("Setting role %s to %s at %s", role_alias, value, guild_id)
+
+    return True
+
+
+async def remove_role_by_id(role_id: int):
+    """
+    Remove role id from database. Called when bot could not get role from Disocrd = role is deleted
+    :param role_id: Role id (int)
+    """
+    logger.debug(
+        "Removing role %s because it does not exist anymore",
+        role_id,
+    )
+    ...
+    # TODO: DELETE FROM ROLES WHERE ROLE = role_id
+    return True
+
+
+async def verify_guild(guild_id: int):
     logger.info("Verifying %s guild", guild_id)
 
-    # Just for testing, TODO: This
+    # TODO: UPDATE
 
     global verified
     verified = True
 
 
-async def unverify_guild(guild_id: int) -> bool:
+async def unverify_guild(guild_id: int):
     logger.debug("Unverifying %s guild", guild_id)
 
     # Just for testing TODO: This
@@ -73,25 +121,25 @@ async def unverify_guild(guild_id: int) -> bool:
     verified = False
 
 
-async def set_switch(guild_id: int, alias: str, value: bool) -> bool:
-    ...  # TODO
-    logger.debug("Setting switch %s to %s at %s", alias, value, guild_id)
-
-    return True
-
-
-async def set_role(guild_id: int, role_alias: str, value: Optional[int]) -> bool:
-    ...  # TODO
-    logger.debug("Setting role %s to %s at %s", role_alias, value, guild_id)
-
-    return True
+async def activate_guild(guild_id):
+    """
+    Insert guild into database if not exist, updates and sets is_available to True
+    :param guild_id:
+    """
+    ...
 
 
-async def remove_role_by_id(guild_id: int, role_id: int) -> bool:
-    logger.debug(
-        "Removing role %s from guild %s because it does not exist anymore",
-        role_id,
-        guild_id,
-    )
-    ...  # TODO
-    return True
+async def deactivate_guild(guild_id):
+    """
+
+    :param guild_id:
+    :return:
+    """
+
+
+async def check_guild(guild_id):
+    """
+
+    :param guild_id:
+    :return:
+    """

@@ -1,4 +1,6 @@
-from typing import Union
+from __future__ import annotations
+
+from typing import Union, Type
 
 import disnake
 
@@ -7,7 +9,7 @@ from plasmosync.config import PlasmoRP, PlasmoSMP
 
 
 async def get_roles_difference(
-        donor: Union[PlasmoRP, PlasmoSMP], user: disnake.Member, donor_user: disnake.Member
+        donor: Type[PlasmoRP] | Type[PlasmoSMP], user: disnake.Member, donor_user: disnake.Member
 ) -> tuple[list[disnake.Role, None], list[disnake.Role, None]]:
     """
     Compares roles at
@@ -28,8 +30,8 @@ async def get_roles_difference(
             donor.roles_by_aliases[role_alias].discord_id
         )
 
-        if local_role is None:
-            await remove_role_by_id(user.guild.id, local_role_id)
+        if local_role is None and local_role_id is not None:
+            await remove_role_by_id(local_role_id)
             continue
 
         user_has_donor_role = donor_role in donor_user.roles

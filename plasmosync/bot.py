@@ -28,7 +28,6 @@ class PlasmoSync(commands.Bot):
         _intents.members = True
         _intents.bans = True
         _intents.dm_messages = True
-        _intents.emojis_and_stickers = True
         _intents.guilds = True
 
         return cls(
