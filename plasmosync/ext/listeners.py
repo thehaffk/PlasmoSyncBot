@@ -12,6 +12,8 @@ class Listeners(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
+    # TODO: Refactor listeners and change arguments basing on docs.disnake.dev
+
     @commands.Cog.listener('on_member_ban')
     async def ban_handler(self, guild: disnake.Guild, user: disnake.User):
         # TODO
@@ -25,9 +27,9 @@ class Listeners(commands.Cog):
         ...  # Get all verified guilds with sync_bans switch enabled and sync user
 
     @commands.Cog.listener('on_member_join')
-    async def join_handler(self, guild: disnake.Guild, user: disnake.User):
+    async def join_handler(self, user: disnake.Member):
         # TODO
-        if guild.id == settings.DONOR.guild_discord_id:
+        if user.guild.id == settings.DONOR.guild_discord_id:
             ...
         else:
             ...
