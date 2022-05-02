@@ -8,6 +8,22 @@ from plasmosync.utils.database import get_guild_roles, remove_role_by_id
 from plasmosync.config import PlasmoRP, PlasmoSMP
 
 
+def build_progressbar(cursor: int, total_count: int) -> str:
+    """
+    Build progressbar with given numbers
+
+    :return: string with 🟥 and 🟩
+    """
+    if total_count < 10:
+        cursor *= 10
+        total_count *= 10
+
+    if total_count == 0 or total_count == cursor:
+        return "🟩" * 10
+
+    return "🟩" * int((cursor // (total_count // 10))) + "🟥" * (10 - int((cursor // (total_count // 10))))
+
+
 async def get_roles_difference(
         donor: Type[PlasmoRP] | Type[PlasmoSMP], user: disnake.Member, donor_user: disnake.Member
 ) -> tuple[list[disnake.Role, None], list[disnake.Role, None]]:
