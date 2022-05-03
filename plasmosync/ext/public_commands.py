@@ -392,7 +392,7 @@ class PublicCommands(commands.Cog):
         role: disnake.Role = commands.Param(),
     ):
         """
-        Установить
+        Установить роль для синхронизации
 
         Parameters
         ----------
@@ -407,6 +407,34 @@ class PublicCommands(commands.Cog):
                 title="Настройки обновлены",
                 description=f"Роль {role.mention} "
                 f"установлена как **{settings.DONOR.roles_by_aliases[role_alias].name}**",
+                color=disnake.Color.dark_green(),
+            )
+        )
+
+    @commands.guild_only()
+    @commands.has_permissions(manage_roles=True)
+    @commands.slash_command(name="reset-role")
+    async def resetrole_command(
+        self,
+        inter: ApplicationCommandInteraction,
+        role_alias: str = commands.Param(
+            autocomplete=autocompleters.autocomplete_reset_role
+        ),
+    ):
+        """
+        Сбросить роль
+
+        Parameters
+        ----------
+        role_alias: Роль на Plasmo
+        """
+        await inter.response.defer(ephemeral=True)
+        await database.set_role(inter.guild_id, role_alias, value=None)
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                title="Настройки обновлены",
+                description=f"Роль **{settings.DONOR.roles_by_aliases[role_alias].name}** сброшена",
                 color=disnake.Color.dark_green(),
             )
         )
