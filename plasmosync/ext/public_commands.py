@@ -7,7 +7,7 @@ from disnake.ext import commands
 from disnake.ext.commands import user_command
 
 from plasmosync import settings, config, utils
-from plasmosync.utils import database
+from plasmosync.utils import database, autocompleters
 
 logger = logging.getLogger(__name__)
 
@@ -219,7 +219,6 @@ class PublicCommands(commands.Cog):
     # TODO: /help
     # TODO: /status
 
-    @commands.guild_only()
     @commands.slash_command(name="sync")
     async def sync_command(
         self, inter: ApplicationCommandInteraction, user: disnake.Member
@@ -279,8 +278,8 @@ class PublicCommands(commands.Cog):
         return await self.sync_command(inter, user)
 
     @commands.guild_only()
-    @commands.slash_command()
-    async def settings(self, inter: ApplicationCommandInteraction):
+    @commands.slash_command(name="settings")
+    async def settings_command(self, inter: ApplicationCommandInteraction):
         """
         Настройки Plasmo Sync
         """
@@ -378,6 +377,39 @@ class PublicCommands(commands.Cog):
                 inline=False,
             )
         await inter.edit_original_message(embed=status_embed)
+
+    #
+
+    @commands.guild_only()
+    @commands.has_permissions(manage_roles=True)
+    @commands.slash_command(name="set-role")
+    async def setrole_command(
+        self,
+        inter: ApplicationCommandInteraction,
+        role_alias: str = commands.Param(
+            autocomplete=autocompleters.autocomplete_set_role
+        ),
+        role: disnake.Role = commands.Param(),
+    ):
+        """
+        Установить
+
+        Parameters
+        ----------
+        role_alias: Роль на Plasmo
+        role: Локальная роль
+        """
+        await inter.response.defer(ephemeral=True)
+        await database.set_role(inter.guild_id, role_alias, role.id)
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                title="Настройки обновлены",
+                description=f"Роль {role.mention} "
+                f"установлена как **{settings.DONOR.roles_by_aliases[role_alias].name}**",
+                color=disnake.Color.dark_green(),
+            )
+        )
 
     async def cog_load(self) -> None:
         self.core = self.bot.get_cog("SyncCore")

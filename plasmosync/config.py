@@ -130,7 +130,7 @@ class PlasmoRP:
     )
     roles.append(mko_helper_role)
     mko_head_role = PlasmoRole(
-        discord_id=943942349178937344 if DEBUG_VALUES else 971089605858299984  ,
+        discord_id=943942349178937344 if DEBUG_VALUES else 971089605858299984,
         name="Член совета глав МКО",
         alias="mko_head",
         api_alias="supa_helper",

@@ -45,3 +45,6 @@ class PlasmoSync(commands.Bot):
             ),
         )
 
+    async def on_ready(self):
+        logger.info("On ready")
+

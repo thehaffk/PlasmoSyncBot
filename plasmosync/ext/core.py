@@ -156,9 +156,7 @@ class SyncCore(commands.Cog):
                 except aiohttp.ContentTypeError:
                     return False, ["Не удалось подключиться к Plasmo API"]
 
-                if response_json.get("error", {}).get(
-                    "code", response.status
-                ) == 404:
+                if response_json.get("error", {}).get("code", response.status) == 404:
                     return True, []
 
                 if (
