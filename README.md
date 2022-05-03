@@ -5,4 +5,5 @@
     <a href="https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=howkawgew/PlasmoSyncBot&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/9cf2faac8fb1483ea55997f252402d1e" alt="Discord server invite" /></a>
     <a href="https://discord.gg/B6XGDn6x3r"><img src="https://img.shields.io/discord/966785796902363188?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff&label=discord" alt="Discord server invite" /></a>
     <a href="https://github.com/howkawgew/PlasmoSyncBot/commits"><img src="https://img.shields.io/github/commit-activity/w/howkawgew/PlasmoSyncBot.svg?style=flat-square" alt="Commit activity" /></a>
+    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" /></a>
 </p>

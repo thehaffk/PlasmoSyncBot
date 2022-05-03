@@ -28,7 +28,9 @@ def setup() -> None:
     file_handler.setFormatter(log_format)
     root_logger.addHandler(file_handler)
 
-    logging.getLogger("disnake").setLevel(logging.WARNING)
+    logging.getLogger("disnake").setLevel(logging.INFO)
+    logging.getLogger("aiosqlite").setLevel(logging.WARNING)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
 
     coloredlogs.DEFAULT_LEVEL_STYLES = {
         **coloredlogs.DEFAULT_LEVEL_STYLES,
@@ -39,4 +41,6 @@ def setup() -> None:
 
     coloredlogs.DEFAULT_LOG_FORMAT = format_string
 
-    coloredlogs.install(level=logging.DEBUG if settings.DEBUG else logging.INFO, stream=sys.stdout)
+    coloredlogs.install(
+        level=logging.DEBUG if settings.DEBUG else logging.INFO, stream=sys.stdout
+    )

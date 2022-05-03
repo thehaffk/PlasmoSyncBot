@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class SettingButton(disnake.ui.Button["GuildSwitch"]):
     def __init__(
-            self, setting_alias: str, switch_position=False, no_access=False, row=0
+        self, setting_alias: str, switch_position=False, no_access=False, row=0
     ):
 
         if setting_alias == "is_verified":
@@ -52,8 +52,8 @@ class SettingButton(disnake.ui.Button["GuildSwitch"]):
         await inter.response.defer(ephemeral=True)
 
         if (
-                not inter.author.guild_permissions.manage_guild
-                and inter.author.id not in config.OWNERS
+            not inter.author.guild_permissions.manage_guild
+            and inter.author.id not in config.OWNERS
         ):
             return await inter.edit_original_message(
                 embed=disnake.Embed(
@@ -101,10 +101,10 @@ class SettingsView(disnake.ui.View):
     children: List[SettingButton]
 
     def __init__(
-            self,
-            inter: disnake.Interaction,
-            local_settings: dict[str, bool] = None,
-            guild_is_verified=False,
+        self,
+        inter: disnake.Interaction,
+        local_settings: dict[str, bool] = None,
+        guild_is_verified=False,
     ):
         super().__init__(timeout=600)
         for index, setting in enumerate(settings.DONOR.settings):
@@ -142,7 +142,7 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
 
     settings_embed = disnake.Embed(
         title=f"Локальные настройки Plasmo Sync |"
-              f" {config.Emojis.verified if guild_is_verified else ''} {guild.name}",
+        f" {config.Emojis.verified if guild_is_verified else ''} {guild.name}",
         color=disnake.Color.dark_green(),
     )
 
@@ -152,10 +152,10 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
         if guild_is_verified if setting.verified_servers_only else True:
             settings_embed.add_field(
                 name=(
-                         config.Emojis.enabled if local_setting else config.Emojis.disabled
-                     )
-                     + " "
-                     + setting.name,
+                    config.Emojis.enabled if local_setting else config.Emojis.disabled
+                )
+                + " "
+                + setting.name,
                 value=setting.description,
                 inline=False,
             )
@@ -165,7 +165,7 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
         settings_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Настройки {', '.join([('**' + switch.name + '**') for switch in inaccessible_switches])}"
-                  f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
+            f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
             inline=False,
         )
 
@@ -201,7 +201,7 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
         roles_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Роли {', '.join([('**' + role.name + '**') for role in inaccessible_roles])}"
-                  f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
+            f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
             inline=False,
         )
 
@@ -221,11 +221,17 @@ class PublicCommands(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command(name="sync")
-    async def sync_command(self, inter: ApplicationCommandInteraction, user: disnake.Member):
+    async def sync_command(
+        self, inter: ApplicationCommandInteraction, user: disnake.Member
+    ):
         """
-        Синхронизировать весь сервер
+        Синхронизировать пользователя
+
+        Parameters
+        ----------
+        user: User to sync
         """
-        logger.debug("/everyone_sync called in %s %s", inter.guild, inter.guild_id)
+        logger.debug("/sync called in %s %s", inter.guild, inter.guild_id)
         await inter.response.defer(with_message=False, ephemeral=True)
 
         member = inter.guild.get_member(user.id)
@@ -251,9 +257,9 @@ class PublicCommands(commands.Cog):
                 title=f"Результат синхронизации - {user} | {user.guild}",
                 color=disnake.Color.dark_red(),
             )
-            error_messages = "❌" "\n❌".join(error_messages)
+            error_messages = "❌" + "\n❌".join(error_messages)[:1020]
             synced_embed.add_field(
-                name="Синхронизация прошла c ошибками, проверьте настройки бота:",
+                name="Синхронизация прошла c ошибками:",
                 value=error_messages,
             )
 
@@ -263,14 +269,14 @@ class PublicCommands(commands.Cog):
 
     @user_command(name="Синхронизировать")
     async def sync_button(
-            self, inter: ApplicationCommandInteraction, user: disnake.Member
+        self, inter: ApplicationCommandInteraction, user: disnake.Member
     ):
         """
         "Sync" button
         :param inter: button interaction
         :param user: user to sync
         """
-        return self.sync_command(inter, user)
+        return await self.sync_command(inter, user)
 
     @commands.guild_only()
     @commands.slash_command()
@@ -326,7 +332,8 @@ class PublicCommands(commands.Cog):
             if member.bot:
                 status_embed.add_field(
                     name=f"Пользователи: {counter + 1}/{len(members)}",
-                    value=f"{member} - синхронизация ботов отключена",
+                    value=utils.build_progressbar(counter + 1, len(members))
+                    + f"\n{member} - синхронизация ботов отключена",
                 )
 
             else:
@@ -336,22 +343,22 @@ class PublicCommands(commands.Cog):
                     status_embed.add_field(
                         name=f"Пользователи: {counter + 1}/{len(members)}",
                         value=utils.build_progressbar(counter + 1, len(members))
-                              + "\n"
-                              + f"{member} - синхронизация прошла успешно",
+                        + "\n"
+                        + f"{member} - синхронизация прошла успешно",
                     )
                 else:
                     status_embed.add_field(
                         name=f"Пользователи: {counter + 1}/{len(members)}",
                         value=utils.build_progressbar(counter + 1, len(members))
-                              + "\n"
-                              + f"{member} - синхронизация прошла с ошибками",
+                        + "\n"
+                        + f"{member} - синхронизация прошла с ошибками",
                     )
 
             if errors:
                 errors = list(set(errors))
                 status_embed.add_field(
                     name=f"При синхронизация произошли ошибки:",
-                    value="\n" "❌" + "\n❌".join(errors)[:1020],
+                    value="❌" + "\n❌".join(errors)[:1020],
                     inline=False,
                 )
 

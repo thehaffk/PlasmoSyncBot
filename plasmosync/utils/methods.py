@@ -21,12 +21,16 @@ def build_progressbar(cursor: int, total_count: int) -> str:
     if total_count == 0 or total_count == cursor:
         return "🟩" * 10
 
-    return "🟩" * int((cursor // (total_count // 10))) + "🟥" * (10 - int((cursor // (total_count // 10))))
+    return "🟩" * int((cursor // (total_count // 10))) + "🟥" * (
+        10 - int((cursor // (total_count // 10)))
+    )
 
 
 async def get_roles_difference(
-        donor: Type[PlasmoRP] | Type[PlasmoSMP], user: disnake.Member, donor_user: disnake.Member
-) -> tuple[list[disnake.Role, None], list[disnake.Role, None]]:
+    donor: Type[PlasmoRP] | Type[PlasmoSMP],
+    user: disnake.Member,
+    donor_user: disnake.Member,
+) -> tuple[list[disnake.Role] | list, list[disnake.Role] | list]:
     """
     Compares roles at
     :param donor: Configs for donor
@@ -46,8 +50,9 @@ async def get_roles_difference(
             donor.roles_by_aliases[role_alias].discord_id
         )
 
-        if local_role is None and local_role_id is not None:
-            await remove_role_by_id(local_role_id)
+        if local_role is None:
+            if local_role_id is not None:
+                await remove_role_by_id(local_role_id)
             continue
 
         user_has_donor_role = donor_role in donor_user.roles

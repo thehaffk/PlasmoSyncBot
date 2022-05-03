@@ -5,10 +5,10 @@ Internal config for bot - guild, roles, switches
 from dataclasses import dataclass
 from typing import Optional
 
-DEBUG = True
+DEBUG_VALUES = False
 OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
 
-
+DATABASE_PATH = "plasmosync/data.db"
 # WIKI_LINK = "https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a"  # TODO: Add different wikis to
 #  different servers
 # rp_api_link = "https://rp.plo.su/api/"
@@ -59,13 +59,13 @@ class PlasmoRP:
 
     name = "Plasmo RP"
 
-    guild_discord_id = 828683007635488809 if DEBUG else 828683007635488809
+    guild_discord_id = 828683007635488809 if DEBUG_VALUES else 672312131760291842
     api_base_url = "https://rp.plo.su/api"
 
     roles = []
 
     player_role = PlasmoRole(
-        discord_id=943941965655973888 if DEBUG else 746628733452025866,
+        discord_id=943941965655973888 if DEBUG_VALUES else 971089605858299984,
         name="Игрок",
         alias="player",
         api_alias="player",
@@ -73,7 +73,7 @@ class PlasmoRP:
     )
     roles.append(player_role)
     fusion_role = PlasmoRole(
-        discord_id=943942028054650881 if DEBUG else 751722994170331136,
+        discord_id=943942028054650881 if DEBUG_VALUES else 971089605858299984,
         name="Fusion",
         alias="fusion",
         api_alias="support",
@@ -81,7 +81,7 @@ class PlasmoRP:
     )
     roles.append(fusion_role)
     interpol_role = PlasmoRole(
-        discord_id=943942071906078831 if DEBUG else 751723033357451335,
+        discord_id=943942071906078831 if DEBUG_VALUES else 971089605858299984,
         name="Интерпол",
         alias="interpol",
         api_alias="helper",
@@ -89,7 +89,7 @@ class PlasmoRP:
     )
     roles.append(interpol_role)
     admin_role = PlasmoRole(
-        discord_id=943942125198905414 if DEBUG else 704364763248984145,
+        discord_id=943942125198905414 if DEBUG_VALUES else 971089605858299984,
         name="Администрация",
         alias="admin",
         api_alias="admin",
@@ -98,7 +98,7 @@ class PlasmoRP:
     roles.append(admin_role)
 
     support_role = PlasmoRole(
-        discord_id=943942163400626257 if DEBUG else 872899130270294046,
+        discord_id=943942163400626257 if DEBUG_VALUES else 971089605858299984,
         name="Поддержка",
         alias="support",
         api_alias=None,
@@ -106,7 +106,7 @@ class PlasmoRP:
     )
     roles.append(support_role)
     banker_role = PlasmoRole(
-        discord_id=968607821996384346 if DEBUG else 826367015014498314,
+        discord_id=968607821996384346 if DEBUG_VALUES else 971089605858299984,
         name="Банкир",
         alias="banker",
         api_alias="banker",
@@ -114,7 +114,7 @@ class PlasmoRP:
     )
     roles.append(banker_role)
     mko_member_role = PlasmoRole(
-        discord_id=943942205129756673 if DEBUG else 844507728671277106,
+        discord_id=943942205129756673 if DEBUG_VALUES else 971089605858299984,
         name="Участник совета МКО",
         alias="mko_member",
         api_alias=None,
@@ -122,7 +122,7 @@ class PlasmoRP:
     )
     roles.append(mko_member_role)
     mko_helper_role = PlasmoRole(
-        discord_id=943942311551844442 if DEBUG else 826366703591620618,
+        discord_id=943942311551844442 if DEBUG_VALUES else 971089605858299984,
         name="Помощник совета глав",
         alias="mko_helper",
         api_alias="soviet-helper",
@@ -130,7 +130,7 @@ class PlasmoRP:
     )
     roles.append(mko_helper_role)
     mko_head_role = PlasmoRole(
-        discord_id=943942349178937344 if DEBUG else 810492714235723777,
+        discord_id=943942349178937344 if DEBUG_VALUES else 971089605858299984  ,
         name="Член совета глав МКО",
         alias="mko_head",
         api_alias="supa_helper",
@@ -138,7 +138,7 @@ class PlasmoRP:
     )
     roles.append(mko_head_role)
     president_role = PlasmoRole(
-        discord_id=948303445281108038 if DEBUG else 880065048792420403,
+        discord_id=948303445281108038 if DEBUG_VALUES else 971089605858299984,
         name="Президент МКО",
         alias="president",
         api_alias="president",
@@ -244,43 +244,3 @@ class DevServer:
         "Синхронизировать баны": "sync_bans",
         "Удаление ролей": "unsync_roles",
     }"""
-
-
-all_plasmo_roles = [
-    "player",
-    "fusion",
-    "interpol",
-    "admin",
-]
-verified_plasmo_roles = [
-    "support",
-    "mko_member",
-    "mko_head",
-    "banker",
-    "mko_helper",
-]
-all_roles_names = {
-    "player": "Игрок",
-    "fusion": "Fusion",
-    "interpol": "Интерпол",
-    "admin": "Администрация",
-    "support": "Поддержка",
-    "mko_member": "Участник Совета МКО",
-    "mko_head": "Член совета глав",
-    "banker": "Банкир",
-    "mko_helper": "Помощник совета глав",
-    "banned": f'Бан на {["name"]}',
-}
-all_roles_dict = {}
-for elem in all_roles_names:
-    all_roles_dict[all_roles_names[elem]] = elem
-
-default_settings_dict = {
-    "Синхронизировать роли": "sync_roles",
-    "Синхронизировать ники": "sync_nicknames",
-}
-verified_settings_dict = {
-    "Вайтлист игроков": "kick_guests",
-    "Синхронизировать баны": "sync_bans",
-    "Удаление ролей": "unsync_roles",
-}

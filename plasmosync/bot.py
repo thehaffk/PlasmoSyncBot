@@ -18,6 +18,7 @@ class PlasmoSync(commands.Bot):
     def __init__(self, *args, **kwargs):
         if settings.DEBUG is True:
             kwargs["test_guilds"] = settings.TEST_GUILDS
+            kwargs["test_guilds"] = settings.TEST_GUILDS
             logger.warning("registering as test_guilds")
         super().__init__(*args, **kwargs)
 
@@ -27,7 +28,7 @@ class PlasmoSync(commands.Bot):
         _intents = disnake.Intents.none()
         _intents.members = True
         _intents.bans = True
-        _intents.dm_messages = True
+        _intents.dm_messages = True  # ????
         _intents.guilds = True
 
         return cls(
@@ -43,3 +44,4 @@ class PlasmoSync(commands.Bot):
                 " made by Plasmo R&D [howkawgew]"
             ),
         )
+
