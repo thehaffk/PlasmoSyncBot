@@ -275,6 +275,7 @@ class SyncCore(commands.Cog):
                         )
                         sync_status = False
                         sync_errors.append(f"Не удалось кикнуть пользователя ({user})")
+                return sync_status, sync_errors
 
             # API Sync
             if donor_user is None and guild_settings.get(
