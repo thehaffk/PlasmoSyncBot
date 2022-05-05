@@ -59,34 +59,35 @@ class Listeners(commands.Cog):
             if guild_is_verified and guild_settings.get("sync_bans", False):
                 await self.core.sync_bans(user, user_guild=guild)
 
+    # TODO
     @commands.Cog.listener("on_member_join")
     async def join_handler(self, user: disnake.Member):
-        # TODO
         if user.guild.id == settings.DONOR.guild_discord_id:
             ...
         else:
             ...
+        # if donor - sync on all guilds with sync roles/sync nicknames enabled, else - sync locally
 
-        ...  # if donor - sync on all guilds with sync roles/sync nicknames enabled, else - sync locally
-
+    # TODO
     @commands.Cog.listener("on_member_leave")
     async def leave_handler(self, guild: disnake.Guild, user: disnake.User):
-        # TODO
         ...  # if donor - sync on all guilds with sync roles/whitelist enabled, else - pass
 
+    # TODO
     @commands.Cog.listener("on_member_update")
     async def updates_handler(self, guild: disnake.Guild, user: disnake.User):
-        # TODO
         ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
 
     @commands.Cog.listener("on_guild_join")
-    async def new_guild_handler(self, guild: disnake.Guild, user: disnake.User):
-        # TODO
-        ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
+    async def new_guild_handler(self, guild: disnake.Guild):
+        if guild.id == settings.DONOR.guild_discord_id:
+            logger.info("Joined donor guild")
+        else:
+            await database.activate_guild(guild_id=guild.id)
 
+    # TODO
     @commands.Cog.listener("on_guild_leave")
-    async def deactivated_guild_handler(self, guild: disnake.Guild, user: disnake.User):
-        # TODO
+    async def deactivated_guild_handler(self, guild: disnake.Guild):
         ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
 
     async def cog_load(self) -> None:

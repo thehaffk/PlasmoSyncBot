@@ -228,7 +228,7 @@ async def unverify_guild(guild_id: int):
 
 async def activate_guild(guild_id):
     """
-    Insert guild into database, if not exist - updates and sets is_available to False
+    Insert guild into database, if not exist - updates and sets is_available to True
     """
     logger.debug("Activating %s", guild_id)
     async with aiosqlite.connect(PATH) as db:
