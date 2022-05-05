@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG_VALUES = False
+DEBUG_VALUES = True
 OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
 TOKEN = os.getenv("BOT_TOKEN")
 TEST_GUILDS = [966785796902363188, 828683007635488809]
@@ -111,7 +111,7 @@ class PlasmoRP:
     )
     roles.append(support_role)
     banker_role = PlasmoRole(
-        discord_id=968607821996384346 if DEBUG_VALUES else 826367015014498314,
+        discord_id=943942205129756673 if DEBUG_VALUES else 826367015014498314,
         name="Банкир",
         alias="banker",
         api_alias="banker",

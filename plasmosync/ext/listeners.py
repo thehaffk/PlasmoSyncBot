@@ -37,9 +37,7 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_member_unban")
     async def unban_handler(self, guild: disnake.Guild, user: disnake.User):
-        logger.debug(
-            "%s (%s) was unbanned in %s (%s)", user, user.id, guild, guild.id
-        )
+        logger.debug("%s (%s) was unbanned in %s (%s)", user, user.id, guild, guild.id)
         if guild.id == settings.DONOR.guild_discord_id:
             guilds_to_sync = await database.get_active_guilds(switch="sync_bans")
             for guild_id in guilds_to_sync:
@@ -73,10 +71,30 @@ class Listeners(commands.Cog):
     async def leave_handler(self, guild: disnake.Guild, user: disnake.User):
         ...  # if donor - sync on all guilds with sync roles/whitelist enabled, else - pass
 
-    # TODO
     @commands.Cog.listener("on_member_update")
-    async def updates_handler(self, guild: disnake.Guild, user: disnake.User):
-        ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
+    async def updates_handler(self, before: disnake.Member, after: disnake.Member):
+        if before.guild.id != settings.DONOR.guild_discord_id:
+            return
+
+        guilds_to_sync = []
+        if before.roles != after.roles:
+            changed_role = (
+                    list(set(before.roles) - set(after.roles))
+                    + list(set(after.roles) - set(before.roles))
+            )[0]
+            if changed_role.id == settings.DONOR.player_role.discord_id:
+                guilds_to_sync += await database.get_active_guilds(switch="whitelist")
+
+            if changed_role.id in [role.discord_id for role in settings.DONOR.roles]:
+                guilds_to_sync += await database.get_active_guilds(switch="sync_roles")
+
+        if before.display_name != after.display_name:
+            guilds_to_sync += await database.get_active_guilds(switch="sync_nicknames")
+
+        for guild_id in set(guilds_to_sync):
+            guild = self.bot.get_guild(guild_id)
+            if (member := await guild.getch_member(before.id)) is not None:
+                await self.core.sync(member)
 
     @commands.Cog.listener("on_guild_join")
     async def new_guild_handler(self, guild: disnake.Guild):
