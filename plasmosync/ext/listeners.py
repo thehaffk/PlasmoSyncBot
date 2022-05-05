@@ -85,10 +85,12 @@ class Listeners(commands.Cog):
         else:
             await database.activate_guild(guild_id=guild.id)
 
-    # TODO
     @commands.Cog.listener("on_guild_leave")
     async def deactivated_guild_handler(self, guild: disnake.Guild):
-        ...  # if donor - update on all guilds where sync roles / sync nicknames / whitelist enabled
+        if guild.id == settings.DONOR.guild_discord_id:
+            logger.critical("Left donor guild")
+        else:
+            await database.deactivate_guild(guild_id=guild.id)
 
     async def cog_load(self) -> None:
         logger.info("Loaded %s", __name__)
