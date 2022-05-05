@@ -119,7 +119,7 @@ class SyncCore(commands.Cog):
             # If user is banned
             if user_guild.get_member(user.id) is None:
                 try:
-                    await donor_guild.unban(
+                    await user_guild.unban(
                         user,
                         reason="Sync bans (privileged) is enabled,"
                         " use /settings to disable",
