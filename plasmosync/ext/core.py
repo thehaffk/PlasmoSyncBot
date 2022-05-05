@@ -101,7 +101,8 @@ class SyncCore(commands.Cog):
         async for ban in donor_guild.bans():
             if ban.user.id == user.id:
                 try:
-                    await user.ban(
+                    await user_guild.ban(
+                        user=disnake.Object(user.id),
                         delete_message_days=0,
                         reason="Sync bans (privileged) is enabled,"
                         f" use /setting to disable [Plasmo ban reason:  {ban.reason}]",

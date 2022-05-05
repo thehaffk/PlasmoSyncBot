@@ -16,7 +16,7 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_member_ban")
     async def ban_handler(self, guild: disnake.Guild, user: disnake.User):
-        logger.debug("%s (<@%s>) was banned on %s (%s)", user, user.id, guild, guild.id)
+        logger.debug("%s (%s) was banned in %s (%s)", user, user.id, guild, guild.id)
         if guild.id == settings.DONOR.guild_discord_id:
             guilds_to_sync = await database.get_active_guilds()
             for guild_id in guilds_to_sync:
@@ -26,21 +26,38 @@ class Listeners(commands.Cog):
                     and (member := await guild.getch_member(user.id)) is not None
                 ):
                     await self.core.sync(member)
-            return
-
-        await self.bot.get_guild(config.DevServer.id).get_channel(
-            config.DevServer.bot_logs_channel_id
-        ).send(f"**[DEBUG]** {user}({user.id}) was banned in {guild}")
-        guild_is_verified = await database.is_guild_verified(guild_id=guild.id)
-        guild_settings = await database.get_guild_switches(guild_id=guild.id)
-        if guild_is_verified and guild_settings.get("sync_bans", False):
-            await self.core.sync_bans(user)
+        else:
+            await self.bot.get_guild(config.DevServer.id).get_channel(
+                config.DevServer.bot_logs_channel_id
+            ).send(f"**[DEBUG]** {user}(<@{user.id}>) was banned in {guild}")
+            guild_is_verified = await database.is_guild_verified(guild_id=guild.id)
+            guild_settings = await database.get_guild_switches(guild_id=guild.id)
+            if guild_is_verified and guild_settings.get("sync_bans", False):
+                await self.core.sync_bans(user, user_guild=guild)
 
     @commands.Cog.listener("on_member_unban")
     async def unban_handler(self, guild: disnake.Guild, user: disnake.User):
-        # TODO
-
-        ...  # Get all verified guilds with sync_bans switch enabled and sync user
+        logger.debug(
+            "%s (%s) was unbanned in %s (%s)", user, user.id, guild, guild.id
+        )
+        if guild.id == settings.DONOR.guild_discord_id:
+            guilds_to_sync = await database.get_active_guilds(switch="sync_bans")
+            for guild_id in guilds_to_sync:
+                guild = self.bot.get_guild(guild_id)
+                if (
+                    guild is not None
+                    and await database.is_guild_verified(guild.id)
+                    and (member := await guild.getch_member(user.id)) is not None
+                ):
+                    await self.core.sync(member)
+        else:
+            await self.bot.get_guild(config.DevServer.id).get_channel(
+                config.DevServer.bot_logs_channel_id
+            ).send(f"**[DEBUG]** {user}(<@{user.id}>) was unbanned in {guild}")
+            guild_is_verified = await database.is_guild_verified(guild_id=guild.id)
+            guild_settings = await database.get_guild_switches(guild_id=guild.id)
+            if guild_is_verified and guild_settings.get("sync_bans", False):
+                await self.core.sync_bans(user, user_guild=guild)
 
     @commands.Cog.listener("on_member_join")
     async def join_handler(self, user: disnake.Member):
