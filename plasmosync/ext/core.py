@@ -149,7 +149,7 @@ class SyncCore(commands.Cog):
         # We know that sync nicknames or sync roles is enabled, so we must do an api call before config checks
         async with ClientSession() as session:
             async with session.get(
-                url=f"https://rp.plo.su/api/user/profile?discord_id={user.id}",
+                url=f"{donor.api_base_url}/user/profile?discord_id={user.id}",
             ) as response:
                 try:
                     response_json = await response.json()

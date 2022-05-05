@@ -7,9 +7,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-
 load_dotenv()
-
 
 DEBUG_VALUES = False
 OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
@@ -214,8 +212,96 @@ class PlasmoSMP:
 
     name = "Plasmo SMP"
 
-    # TODO: This
-    ...
+    guild_discord_id = 828683007635488809 if DEBUG_VALUES else 385007717623922688
+    api_base_url = "https://smp.plo.su/api"
+
+    roles = []
+
+    player_role = PlasmoRole(
+        discord_id=943941965655973888 if DEBUG_VALUES else 626887926373941258,  # Done
+        name="Игрок",
+        alias="player",
+        api_alias="player",
+        verified_servers_only=False,
+    )
+    roles.append(player_role)
+    fusion_role = PlasmoRole(
+        discord_id=943942028054650881 if DEBUG_VALUES else 626887902953209866,  # Done
+        name="Fusion",
+        alias="fusion",
+        api_alias="support",
+        verified_servers_only=False,
+    )
+    roles.append(fusion_role)
+    interpol_role = PlasmoRole(
+        discord_id=943942071906078831 if DEBUG_VALUES else 626887908946739200,  # Done
+        name="Хелпер",
+        alias="interpol",
+        api_alias="helper",
+        verified_servers_only=False,
+    )
+    roles.append(interpol_role)
+    admin_role = PlasmoRole(
+        discord_id=943942125198905414 if DEBUG_VALUES else 222718720127139840,  # Done
+        name="Администрация",
+        alias="admin",
+        api_alias="admin",
+        verified_servers_only=False,
+    )
+    roles.append(admin_role)
+
+    roles_by_aliases = dict()
+    for role in roles:
+        roles_by_aliases[role.alias] = role
+
+    settings = []
+    sync_nicknames = Setting(
+        alias="sync_nicknames",
+        name="Синхронизация ников",
+        description="**Plasmo Sync** будет синхронизировать ники всех пользователей с Plasmo SMP",
+        default=False,
+        verified_servers_only=False,
+    )
+    settings.append(sync_nicknames)
+    sync_roles = Setting(
+        alias="sync_roles",
+        name="Синхронизация ролей",
+        description="**Plasmo Sync** будет синхронизировать установленные роли всех пользователей с Plasmo SMP",
+        default=False,
+        verified_servers_only=False,
+    )
+    settings.append(sync_roles)
+    use_api = Setting(
+        alias="use_api",
+        name="Использование API",
+        description="**Plasmo Sync** будет синхронизировать ники пользователей, даже если их нет на Plasmo SMP",
+        default=True,
+        verified_servers_only=True,
+    )
+    settings.append(use_api)
+    whitelist = Setting(
+        alias="whitelist",
+        name="Вайтлист игроков",
+        description='**Plasmo Sync** будет кикать пользователей с сервера, если у них нет роли "Игрок" на Plasmo SMP',
+        default=False,
+        verified_servers_only=True,
+    )
+    settings.append(whitelist)
+
+    sync_bans = Setting(
+        alias="sync_bans",
+        name="Синхронизация банов",
+        description="**Plasmo Sync** будет банить всех участников сервера, которые забанены на Plasmo SMP."
+        " Функция разбанов может работать нестабильно"
+        " - пишите в [поддержку](https://discord.gg/snD9Zcys5Y), если найдете баг",
+        default=False,
+        verified_servers_only=True,
+    )
+    settings.append(sync_bans)
+
+    settings_by_aliases = dict()
+    for setting in settings:
+        settings_by_aliases[setting.alias] = setting
 
 
 class PlasmoFRP:
@@ -225,8 +311,96 @@ class PlasmoFRP:
 
     name = "Plasmo FRP"
 
-    # TODO: This
-    ...
+    guild_discord_id = 828683007635488809 if DEBUG_VALUES else 760608196519133205
+    api_base_url = None
+
+    roles = []
+
+    player_role = PlasmoRole(
+        discord_id=943941965655973888 if DEBUG_VALUES else 846004768425508894,
+        name="Игрок",
+        alias="player",
+        api_alias="player",
+        verified_servers_only=False,
+    )
+    roles.append(player_role)
+    fusion_role = PlasmoRole(
+        discord_id=943942028054650881 if DEBUG_VALUES else 790939484215967794,
+        name="Fusion",
+        alias="fusion",
+        api_alias="support",
+        verified_servers_only=False,
+    )
+    roles.append(fusion_role)
+    moderator_role = PlasmoRole(
+        discord_id=943942071906078831 if DEBUG_VALUES else 776422381887160351,
+        name="Модерация",
+        alias="moderator",
+        api_alias=None,
+        verified_servers_only=False,
+    )
+    roles.append(moderator_role)
+    frpteam_role = PlasmoRole(
+        discord_id=943942071906078831 if DEBUG_VALUES else 802193612942475314,
+        name="Команда FRP",
+        alias="frpteam",
+        api_alias=None,
+        verified_servers_only=True,
+    )
+    roles.append(frpteam_role)
+    admin_role = PlasmoRole(
+        discord_id=943942125198905414 if DEBUG_VALUES else 760609898181689386,
+        name="Администрация",
+        alias="admin",
+        api_alias=None,
+        verified_servers_only=False,
+    )
+    roles.append(admin_role)
+
+    roles_by_aliases = dict()
+    for role in roles:
+        roles_by_aliases[role.alias] = role
+
+    settings = []
+    sync_nicknames = Setting(
+        alias="sync_nicknames",
+        name="Синхронизация ников",
+        description="**Plasmo Sync** будет синхронизировать ники всех пользователей с Plasmo SMP",
+        default=False,
+        verified_servers_only=False,
+    )
+    settings.append(sync_nicknames)
+    sync_roles = Setting(
+        alias="sync_roles",
+        name="Синхронизация ролей",
+        description="**Plasmo Sync** будет синхронизировать установленные роли всех пользователей с Plasmo SMP",
+        default=False,
+        verified_servers_only=False,
+    )
+    settings.append(sync_roles)
+    whitelist = Setting(
+        alias="whitelist",
+        name="Вайтлист игроков",
+        description='**Plasmo Sync** будет кикать пользователей с сервера, если у них нет роли "Игрок" на Plasmo SMP',
+        default=False,
+        verified_servers_only=True,
+    )
+    settings.append(whitelist)
+
+    sync_bans = Setting(
+        alias="sync_bans",
+        name="Синхронизация банов",
+        description="**Plasmo Sync** будет банить всех участников сервера, которые забанены на Plasmo SMP."
+        " Функция разбанов может работать нестабильно"
+        " - пишите в [поддержку](https://discord.gg/snD9Zcys5Y), если найдете баг",
+        default=False,
+        verified_servers_only=True,
+    )
+    settings.append(sync_bans)
+
+    settings_by_aliases = dict()
+    for setting in settings:
+        settings_by_aliases[setting.alias] = setting
 
 
 class DevServer:

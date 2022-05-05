@@ -54,4 +54,5 @@ class PlasmoSync(commands.Bot):
                     logger.critical("Unable to get %s role in donor (Config: %s)", role.name, role.discord_id)
                     return
             logger.info("Donor config is valid")
+            logger.info("Loaded %s/%s roles", len(settings.DONOR.roles), len(settings.DONOR.roles))
 
