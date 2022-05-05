@@ -141,3 +141,4 @@ cython_debug/
 .idea/
 logs/!/plasmosync/data.db
 !/plasmosync/data.db
+!/plasmosync/data.db

@@ -9,44 +9,49 @@ logger = logging.getLogger(__name__)
 
 PATH = config.DATABASE_PATH
 
-"""
-DB Structure - sqlite
 
-create table guilds
-(
-    discord_id   integer not null
-        constraint guilds_pk
-            primary key,
-    is_available integer default 1 not null,
-    is_verified  integer default 0 not null,
-    banned       integer default 0 not null
-);
-
-create table roles
-(
-    guild_discord_id integer not null,
-    alias            text    not null,
-    role_id          integer not null,
-    unique (guild_discord_id, alias)
-);
-
-create table settings
-(
-    guild_discord_id integer not null,
-    alias            text    not null,
-    value            integer default 0 not null,
-    unique (guild_discord_id, alias)
-);
-
-"""
-
-
-# TODO
 async def setup() -> bool:
     """
     Check if database is ready for use, updates columns if not
     """
     logger.info("Setting up database...")
+    create_guilds_query = """
+        CREATE TABLE IF NOT EXISTS guilds
+        (
+            discord_id   integer not null
+                constraint guilds_pk
+                    primary key,
+            is_available integer default 1 not null,
+            is_verified  integer default 0 not null,
+            banned       integer default 0 not null
+        );
+        """
+    create_roles_query = """
+        CREATE TABLE IF NOT EXISTS roles
+        (
+            guild_discord_id integer not null,
+            alias            text    not null,
+            role_id          integer not null,
+            unique (guild_discord_id, alias)
+        );
+        """
+    create_settings_query = """
+        CREATE TABLE IF NOT EXISTS settings
+        (
+            guild_discord_id integer not null,
+            alias            text    not null,
+            value            integer default 0 not null,
+            unique (guild_discord_id, alias)
+        );
+
+        """
+    async with aiosqlite.connect(PATH) as db:
+        async with db.execute(create_guilds_query) as cursor:
+            await db.commit()
+        async with db.execute(create_roles_query) as cursor:
+            await db.commit()
+        async with db.execute(create_settings_query) as cursor:
+            await db.commit()
 
     return True
 
@@ -58,7 +63,7 @@ async def is_guild_verified(guild_id: int) -> bool:
 
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-            "SELECT is_verified FROM guilds WHERE discord_id = ?", (guild_id,)
+                "SELECT is_verified FROM guilds WHERE discord_id = ?", (guild_id,)
         ) as cursor:
             return bool((await cursor.fetchone())[0])
 
@@ -77,7 +82,7 @@ async def get_guild_switches(guild_id: int) -> Dict[str, bool]:
 
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-            "SELECT alias, value FROM settings WHERE guild_discord_id = ?", (guild_id,)
+                "SELECT alias, value FROM settings WHERE guild_discord_id = ?", (guild_id,)
         ) as cursor:
             for alias, value in await cursor.fetchall():
                 if alias in settings.DONOR.settings_by_aliases:
@@ -103,7 +108,7 @@ async def get_guild_roles(guild_id: int) -> Dict[str, int]:
 
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-            "SELECT alias, role_id FROM roles WHERE guild_discord_id = ?", (guild_id,)
+                "SELECT alias, role_id FROM roles WHERE guild_discord_id = ?", (guild_id,)
         ) as cursor:
             for alias, role_id in await cursor.fetchall():
                 if alias in settings.DONOR.roles_by_aliases:
@@ -123,14 +128,14 @@ async def get_active_guilds(switch=None) -> List[int]:
     async with aiosqlite.connect(PATH) as db:
         if switch is not None:
             async with db.execute(
-                "SELECT discord_id FROM guilds WHERE is_available = 1 "
-                "AND discord_id IN (SELECT guild_discord_id FROM settings WHERE alias = ? AND value = 1)",
-                (switch,),
+                    "SELECT discord_id FROM guilds WHERE is_available = 1 "
+                    "AND discord_id IN (SELECT guild_discord_id FROM settings WHERE alias = ? AND value = 1)",
+                    (switch,),
             ) as cursor:
                 return [guild[0] for guild in await cursor.fetchall()]
         else:
             async with db.execute(
-                "SELECT discord_id FROM guilds WHERE is_available = 1",
+                    "SELECT discord_id FROM guilds WHERE is_available = 1",
             ) as cursor:
                 return [guild[0] for guild in await cursor.fetchall()]
 
@@ -258,8 +263,8 @@ async def check_guild(guild_id):
 
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-            "SELECT * FROM guilds WHERE discord_id = ? AND is_available = 1",
-            (guild_id,),
+                "SELECT * FROM guilds WHERE discord_id = ? AND is_available = 1",
+                (guild_id,),
         ) as cursor:
             if bool(await cursor.fetchone()):
                 return True
