@@ -213,15 +213,49 @@ class PublicCommands(commands.Cog):
         self.bot = bot
         self.core = None
 
-    # TODO: /set switch <name> <bool>
-    # TODO: /set role <name> <role>
-    # TODO: /reset role
-    # TODO: /help
-    # TODO: /status
+    @commands.slash_command(name="help")
+    async def help_command(
+            self,
+            inter: ApplicationCommandInteraction,
+    ):
+        """
+        Помощь по боту
+        """
+        return await inter.send(
+            ephemeral=True,
+            embed=disnake.Embed(
+                color=disnake.Color.dark_green(),
+                title="<:PlasmoSync:971899748103651338> Plasmo Sync",
+                description=f"Бот для синхронизации ников, ролей и банов "
+                            f"от [digital drugs technologies]({config.DevServer.invite_url}) "
+                            f"с [открытым исходным кодом](https://github.com/howkawgew/PlasmoSyncBot)\n\n"
+                            f"[Гайд в вики Plasmo RP](https://rp.plo.su/wiki/commune)(под гайдом про общины)",
+            ).add_field(
+                name="Команды",
+                inline=False,
+                value="""
+            `/settings` - просмотреть и изменить настройки бота 
+            `/everyone-sync` - синхронизировать всех пользователей на сервере 
+            `/set-role <роль> <role>` - настроить локальную роль 
+            `/reset-role <роль> ` - сбросить локальную роль 
+            
+            `/sync <user> ` - принудительно синхронизировать пользователя 
+            `/help ` - выводит это сообщение 
+            `Кнопка Синхронизировать` - то же самое что и /sync  
+            """,
+            ).set_footer(
+                text="Copyright © 2021 - present howkawgew",
+                icon_url="https://images-ext-1.discordapp.net/external"
+                         "/ZLcJhwmNS-PvOEkbz6Ct2Xf8xGDWD1JrDFptzsGTXmY"
+                         "/%3Fsize%3D512/https/cdn.discordapp.com/avatars"
+                         "/872182651644170240/518f424a8783644027de70bf8b3069be.png",
+
+            ),
+        )
 
     @commands.slash_command(name="sync")
     async def sync_command(
-        self, inter: ApplicationCommandInteraction, user: disnake.Member
+            self, inter: ApplicationCommandInteraction, user: disnake.Member
     ):
         """
         Синхронизировать пользователя
@@ -316,6 +350,8 @@ class PublicCommands(commands.Cog):
         """
         Синхронизировать весь сервер
         """
+
+        # TODO: Make db requests here and pass them with kwargs to avoid hundreds extra db calls
         logger.debug("/everyone_sync called in %s %s", inter.guild, inter.guild_id)
         await inter.response.defer(with_message=False, ephemeral=True)
 
@@ -381,7 +417,7 @@ class PublicCommands(commands.Cog):
     #
 
     @commands.guild_only()
-    @commands.has_permissions(manage_roles=True)
+    @commands.has_permissions(manage_roles=True)  # TODO: Rewrite with perms v2
     @commands.slash_command(name="set-role")
     async def setrole_command(
         self,
