@@ -7,8 +7,6 @@ from plasmosync import settings, config
 
 logger = logging.getLogger()
 
-__all__ = "bot"
-
 
 class PlasmoSync(commands.Bot):
     """
@@ -17,8 +15,7 @@ class PlasmoSync(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         if settings.DEBUG is True:
-            kwargs["test_guilds"] = settings.TEST_GUILDS
-            kwargs["test_guilds"] = settings.TEST_GUILDS
+            kwargs["test_guilds"] = config.TEST_GUILDS
             logger.warning("registering as test_guilds")
         super().__init__(*args, **kwargs)
 
@@ -46,5 +43,15 @@ class PlasmoSync(commands.Bot):
         )
 
     async def on_ready(self):
-        logger.info("On ready")
+        logger.info(f"Logged in as {self.user}")
+        if (donor_guild := self.get_guild(settings.DONOR.guild_discord_id)) is None:
+            logger.critical("Unable to connect to donor guild")
+            return
+        else:
+            logger.info("Connected donor guild as: %s %s", donor_guild, donor_guild.id)
+            for role in settings.DONOR.roles:
+                if (discord_role := donor_guild.get_role(role.discord_id)) is None:
+                    logger.critical("Unable to get %s role in donor (Config: %s)", role.name, role.discord_id)
+                    return
+            logger.info("Donor config is valid")
 

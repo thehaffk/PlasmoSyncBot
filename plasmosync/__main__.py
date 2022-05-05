@@ -3,7 +3,7 @@ import logging
 import sys
 
 from plasmosync import log
-from plasmosync import settings
+from plasmosync import config
 from plasmosync.bot import PlasmoSync
 
 log.setup()
@@ -14,4 +14,4 @@ logger = logging.getLogger(__name__)
 # bot.load_extension("plasmosync.ext.core")
 bot.load_extensions("plasmosync/ext")
 
-bot.run(settings.TOKEN)
+bot.run(config.TOKEN)

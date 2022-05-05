@@ -1,13 +1,20 @@
 """
 Internal config for bot - guild, roles, switches
 """
-
+import os
 from dataclasses import dataclass
 from typing import Optional
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
 DEBUG_VALUES = False
 OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
-
+TOKEN = os.getenv("BOT_TOKEN")
+TEST_GUILDS = [966785796902363188, 828683007635488809]
 DATABASE_PATH = "plasmosync/data.db"
 # WIKI_LINK = "https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a"  # TODO: Add different wikis to
 #  different servers

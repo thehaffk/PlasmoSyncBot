@@ -25,14 +25,14 @@ def build_progressbar(cursor: int, total_count: int) -> str:
         return "🟩" * 10
 
     return "🟩" * int((cursor // (total_count // 10))) + "🟥" * (
-            10 - int((cursor // (total_count // 10)))
+        10 - int((cursor // (total_count // 10)))
     )
 
 
 async def get_roles_difference(
-        donor: Type[PlasmoRP] | Type[PlasmoSMP],
-        user: disnake.Member,
-        donor_user: disnake.Member,
+    donor: Type[PlasmoRP] | Type[PlasmoSMP],
+    user: disnake.Member,
+    donor_user: disnake.Member,
 ) -> tuple[list[disnake.Role] | list, list[disnake.Role] | list]:
     """
     Compares roles at
@@ -53,8 +53,12 @@ async def get_roles_difference(
             donor.roles_by_aliases[role_alias].discord_id
         )
         if donor_role is None:
-            logger.critical("Could not get role from donor: alias %s,  donor user %s, donor role id %s",
-                          role_alias, donor_user, donor.roles_by_aliases[role_alias].discord_id)
+            logger.critical(
+                "Could not get role from donor: alias %s,  donor user %s, donor role id %s",
+                role_alias,
+                donor_user,
+                donor.roles_by_aliases[role_alias].discord_id,
+            )
 
         if local_role is None:
             if local_role_id is not None:
