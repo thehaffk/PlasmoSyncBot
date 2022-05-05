@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Union, Type
 
+from typing import Type
 
 from plasmosync.config import PlasmoRP, PlasmoSMP, PlasmoFRP
 

@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
-from plasmosync import log
 from plasmosync import config
+from plasmosync import log
 from plasmosync.bot import PlasmoSync
 from plasmosync.utils import database
 

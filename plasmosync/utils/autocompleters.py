@@ -1,9 +1,7 @@
-from typing import List, Dict
-
 import disnake
 
-from plasmosync.utils.database import is_guild_verified, get_guild_roles
 from plasmosync.settings import DONOR
+from plasmosync.utils.database import is_guild_verified, get_guild_roles
 
 
 async def autocomplete_set_role(

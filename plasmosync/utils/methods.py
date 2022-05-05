@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Union, Type
+from typing import Type
 
 import disnake
 
-from plasmosync.utils.database import get_guild_roles, remove_role_by_id
 from plasmosync.config import PlasmoRP, PlasmoSMP
+from plasmosync.utils.database import get_guild_roles, remove_role_by_id
 
 logger = logging.getLogger(__name__)
 
