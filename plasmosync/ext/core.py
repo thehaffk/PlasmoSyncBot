@@ -11,7 +11,8 @@ from disnake.ext import commands
 
 import plasmosync.utils
 from plasmosync import settings
-from plasmosync.utils import get_roles_difference, get_guild_switches, is_guild_verified
+from plasmosync.utils.database import get_guild_switches, is_guild_verified
+from plasmosync.utils.methods import get_roles_difference
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class SyncCore(commands.Cog):
             roles_to_remove = [
                 donor_guild.get_role(role_id)
                 for role_id in (
-                    await plasmosync.utils.get_guild_roles(user.id)
+                    await plasmosync.utils.database.get_guild_roles(user.id)
                 ).values()
             ]
             roles_to_add = []

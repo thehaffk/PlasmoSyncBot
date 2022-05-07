@@ -46,11 +46,11 @@ async def setup() -> bool:
 
         """
     async with aiosqlite.connect(PATH) as db:
-        async with db.execute(create_guilds_query) as cursor:
+        async with db.execute(create_guilds_query):
             await db.commit()
-        async with db.execute(create_roles_query) as cursor:
+        async with db.execute(create_roles_query):
             await db.commit()
-        async with db.execute(create_settings_query) as cursor:
+        async with db.execute(create_settings_query):
             await db.commit()
 
     return True

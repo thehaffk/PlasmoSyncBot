@@ -14,7 +14,7 @@ class PlasmoSync(commands.Bot):
     """
 
     def __init__(self, *args, **kwargs):
-        if settings.DEBUG is True:
+        if config.DEVMODE is True:
             kwargs["test_guilds"] = config.TEST_GUILDS
             logger.warning("registering as test_guilds")
         super().__init__(*args, **kwargs)
@@ -33,7 +33,6 @@ class PlasmoSync(commands.Bot):
             status=disnake.Status.do_not_disturb,
             intents=_intents,
             sync_commands=True,
-            sync_permissions=True,
             command_prefix=commands.when_mentioned,
             allowed_mentions=disnake.AllowedMentions(everyone=False),
             activity=disnake.Game(
@@ -50,7 +49,7 @@ class PlasmoSync(commands.Bot):
         else:
             logger.info("Connected donor guild as: %s %s", donor_guild, donor_guild.id)
             for role in settings.DONOR.roles:
-                if (discord_role := donor_guild.get_role(role.discord_id)) is None:
+                if donor_guild.get_role(role.discord_id) is None:
                     logger.critical(
                         "Unable to get %s role in donor (Config: %s)",
                         role.name,

@@ -128,7 +128,7 @@ class AdminTools(commands.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.slash_command(name="sync-ban")
-    async def wipe_and_leave_guild_command(
+    async def sync_user_ban(
             self, inter: ApplicationCommandInteraction, user_id: LargeInt
     ):
         """

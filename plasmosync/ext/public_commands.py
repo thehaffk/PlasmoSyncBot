@@ -9,7 +9,7 @@ from disnake.ext import commands
 from disnake.ext.commands import user_command
 
 from plasmosync import settings, config, utils
-from plasmosync.utils import database, autocompleters
+from plasmosync.utils import database, autocompleters, methods
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +321,6 @@ class PublicCommands(commands.Cog):
         Настройки Plasmo Sync
         """
         await inter.response.defer(with_message=False, ephemeral=True)
-        buttons = []
 
         author_is_admin = inter.author.guild_permissions.manage_guild
         guild_is_verified = await database.is_guild_verified(inter.guild.id)
@@ -372,7 +371,7 @@ class PublicCommands(commands.Cog):
             if member.bot:
                 status_embed.add_field(
                     name=f"Пользователи: {counter + 1}/{len(members)}",
-                    value=utils.build_progressbar(counter + 1, len(members))
+                    value=methods.build_progressbar(counter + 1, len(members))
                           + f"\n{member} - синхронизация ботов отключена",
                 )
 
@@ -386,22 +385,22 @@ class PublicCommands(commands.Cog):
                 if sync_status:
                     status_embed.add_field(
                         name=f"Пользователи: {counter + 1}/{len(members)}",
-                        value=utils.build_progressbar(counter + 1, len(members))
+                        value=methods.build_progressbar(counter + 1, len(members))
                               + "\n"
                               + f"{member} - синхронизация прошла успешно",
                     )
                 else:
                     status_embed.add_field(
                         name=f"Пользователи: {counter + 1}/{len(members)}",
-                        value=utils.build_progressbar(counter + 1, len(members))
-                        + "\n"
-                        + f"{member} - синхронизация прошла с ошибками",
+                        value=utils.methods.build_progressbar(counter + 1, len(members))
+                              + "\n"
+                              + f"{member} - синхронизация прошла с ошибками",
                     )
 
             if errors:
                 errors = list(set(errors))
                 status_embed.add_field(
-                    name=f"При синхронизация произошли ошибки:",
+                    name="При синхронизация произошли ошибки:",
                     value="❌" + "\n❌".join(errors)[:1020],
                     inline=False,
                 )
@@ -412,12 +411,12 @@ class PublicCommands(commands.Cog):
         status_embed.clear_fields()
         status_embed.add_field(
             name=f"Синхронизация пользователей: {len(members)}/{len(members)}",
-            value=utils.build_progressbar(1, 1),
+            value=methods.build_progressbar(1, 1),
             inline=False,
         )
         if errors:
             status_embed.add_field(
-                name=f"При синхронизация произошли ошибки:",
+                name="При синхронизация произошли ошибки:",
                 value="❌" + "\n❌".join(errors)[:1020],
                 inline=False,
             )
