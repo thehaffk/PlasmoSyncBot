@@ -127,7 +127,7 @@ class AdminTools(commands.Cog):
 
     @commands.guild_only()
     @commands.is_owner()
-    @commands.slash_command(name="sync-ban")
+    @commands.slash_command(name="sync-ban", guild_ids=[config.DevServer.id])
     async def sync_user_ban(
             self, inter: ApplicationCommandInteraction, user_id: LargeInt
     ):
