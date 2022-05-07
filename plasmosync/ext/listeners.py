@@ -22,8 +22,8 @@ class Listeners(commands.Cog):
             for guild_id in guilds_to_sync:
                 guild = self.bot.get_guild(guild_id)
                 if (
-                    guild is not None
-                    and (member := await guild.getch_member(user.id)) is not None
+                        guild is not None
+                        and (member := await guild.getch_member(user.id)) is not None
                 ):
                     await self.core.sync(member)
         else:
@@ -43,9 +43,9 @@ class Listeners(commands.Cog):
             for guild_id in guilds_to_sync:
                 guild = self.bot.get_guild(guild_id)
                 if (
-                    guild is not None
-                    and await database.is_guild_verified(guild.id)
-                    and (member := await guild.getch_member(user.id)) is not None
+                        guild is not None
+                        and await database.is_guild_verified(guild.id)
+                        and (member := await guild.getch_member(user.id)) is not None
                 ):
                     await self.core.sync(member)
         else:
@@ -100,13 +100,19 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_guild_join")
     async def guild_join_handler(self, guild: disnake.Guild):
+        await self.bot.get_guild(config.DevServer.id).get_channel(
+            config.DevServer.bot_logs_channel_id
+        ).send(f"**[DEBUG]** Joined {guild}")
         if guild.id == settings.DONOR.guild_discord_id:
             logger.info("Joined donor guild")
         else:
             await database.activate_guild(guild_id=guild.id)
 
-    @commands.Cog.listener("on_guild_leave")
+    @commands.Cog.listener("on_guild_remove")
     async def guild_leave_handler(self, guild: disnake.Guild):
+        await self.bot.get_guild(config.DevServer.id).get_channel(
+            config.DevServer.bot_logs_channel_id
+        ).send(f"**[DEBUG]** Left {guild}")
         if guild.id == settings.DONOR.guild_discord_id:
             logger.critical("Left donor guild")
         else:
