@@ -354,7 +354,6 @@ class PublicCommands(commands.Cog):
         Синхронизировать весь сервер
         """
 
-        # TODO: Make db requests here and pass them with kwargs to avoid hundreds extra db calls
         logger.debug("/everyone_sync called in %s %s", inter.guild, inter.guild_id)
         await inter.response.defer(with_message=False, ephemeral=True)
 
@@ -365,24 +364,31 @@ class PublicCommands(commands.Cog):
         errors = []
         members = inter.guild.members
 
+        guild_is_verified = await database.is_guild_verified(inter.guild_id)
+        guild_settings = await database.get_guild_switches(inter.guild_id)
+
         for counter, member in enumerate(members):
             status_embed.clear_fields()
             if member.bot:
                 status_embed.add_field(
                     name=f"Пользователи: {counter + 1}/{len(members)}",
                     value=utils.build_progressbar(counter + 1, len(members))
-                    + f"\n{member} - синхронизация ботов отключена",
+                          + f"\n{member} - синхронизация ботов отключена",
                 )
 
             else:
-                sync_status, sync_errors = await self.core.sync(member)
+                sync_status, sync_errors = await self.core.sync(
+                    member,
+                    guild_is_verified=guild_is_verified,
+                    guild_settings=guild_settings,
+                )
                 errors += sync_errors
                 if sync_status:
                     status_embed.add_field(
                         name=f"Пользователи: {counter + 1}/{len(members)}",
                         value=utils.build_progressbar(counter + 1, len(members))
-                        + "\n"
-                        + f"{member} - синхронизация прошла успешно",
+                              + "\n"
+                              + f"{member} - синхронизация прошла успешно",
                     )
                 else:
                     status_embed.add_field(

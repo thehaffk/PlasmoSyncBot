@@ -19,8 +19,6 @@ class AdminTools(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-    # TODO: /force-sync-all-guilds
-
     @commands.guild_only()
     @commands.is_owner()
     @commands.slash_command(name="guild", guild_ids=[config.DevServer.id])
@@ -53,35 +51,48 @@ class AdminTools(commands.Cog):
 
     @commands.guild_only()
     @guild_placeholder.sub_command(name="get")
-    async def get_guild_command(self, inter: ApplicationCommandInteraction, guild_id: LargeInt):
+    async def get_guild_command(
+            self, inter: ApplicationCommandInteraction, guild_id: LargeInt
+    ):
         """
         Получить информацию о сервере
         """
         await inter.response.defer(ephemeral=True)
         guild = self.bot.get_guild(guild_id)
         if guild is None:
-            await inter.edit_original_message(
-                content="404 Not found"
-            )
+            await inter.edit_original_message(content="404 Not found")
             return
 
-        guild_embed = disnake.Embed(
-            title=guild.name,
-            description=guild.description
-        )
+        guild_embed = disnake.Embed(title=guild.name, description=guild.description)
         guild_owner = guild.get_member(guild.owner_id)
-        guild_embed.add_field(name="Owner", value=f"{guild_owner} {guild_owner.mention}", inline=False)
-        guild_embed.add_field(name="Member count", value=guild.member_count, inline=False)
+        guild_embed.add_field(
+            name="Owner", value=f"{guild_owner} {guild_owner.mention}", inline=False
+        )
+        guild_embed.add_field(
+            name="Member count", value=guild.member_count, inline=False
+        )
         guild_embed.add_field(name="Info", value=repr(guild), inline=False)
-        guild_embed.add_field(name="Is verified", value=(await database.is_guild_verified(guild_id)), inline=False)
-        guild_embed.add_field(name="Settings", value=(await database.get_guild_switches(guild_id)), inline=False)
-        guild_embed.add_field(name="Roles", value=(await database.get_guild_roles(guild_id)), inline=False)
+        guild_embed.add_field(
+            name="Is verified",
+            value=(await database.is_guild_verified(guild_id)),
+            inline=False,
+        )
+        guild_embed.add_field(
+            name="Settings",
+            value=(await database.get_guild_switches(guild_id)),
+            inline=False,
+        )
+        guild_embed.add_field(
+            name="Roles", value=(await database.get_guild_roles(guild_id)), inline=False
+        )
 
         await inter.edit_original_message(embed=guild_embed)
 
     @commands.guild_only()
     @guild_placeholder.sub_command(name="leave")
-    async def leave_guild_command(self, inter: ApplicationCommandInteraction, guild_id: LargeInt):
+    async def leave_guild_command(
+            self, inter: ApplicationCommandInteraction, guild_id: LargeInt
+    ):
         """
         Выйти с сервера
         """
@@ -92,18 +103,20 @@ class AdminTools(commands.Cog):
         await inter.response.defer(ephemeral=True)
         guild = self.bot.get_guild(guild_id)
         if guild is None:
-            await inter.edit_original_message(
-                content="404 Not found"
-            )
+            await inter.edit_original_message(content="404 Not found")
             return
 
         await guild.leave()
 
-        await inter.edit_original_message(embed=disnake.Embed(title=f"Left {guild}", description=repr(guild)))
+        await inter.edit_original_message(
+            embed=disnake.Embed(title=f"Left {guild}", description=repr(guild))
+        )
 
     @commands.guild_only()
     @guild_placeholder.sub_command(name="wipe-and-leave")
-    async def wipe_and_leave_guild_command(self, inter: ApplicationCommandInteraction, guild_id: LargeInt):
+    async def wipe_and_leave_guild_command(
+            self, inter: ApplicationCommandInteraction, guild_id: LargeInt
+    ):
         """
         Выйти с сервера и очистить всю информацию о нем из базы данных
         """
@@ -115,7 +128,9 @@ class AdminTools(commands.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.slash_command(name="sync-ban")
-    async def wipe_and_leave_guild_command(self, inter: ApplicationCommandInteraction, user_id: LargeInt):
+    async def wipe_and_leave_guild_command(
+            self, inter: ApplicationCommandInteraction, user_id: LargeInt
+    ):
         """
         Синхронизировать бан пользователя на всех серверах, где включена синхронизация банов
         """
@@ -125,7 +140,9 @@ class AdminTools(commands.Cog):
         guilds_to_sync = await database.get_active_guilds(switch="sync_bans")
         user = self.bot.get_user(user_id)
         if user is None:
-            await inter.edit_original_message(content=f"Unable to get user <@{user_id}>")
+            await inter.edit_original_message(
+                content=f"Unable to get user <@{user_id}>"
+            )
             return
         for guild_id in guilds_to_sync:
             if not (await database.is_guild_verified(guild_id)):

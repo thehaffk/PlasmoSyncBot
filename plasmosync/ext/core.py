@@ -205,8 +205,9 @@ class SyncCore(commands.Cog):
         return sync_status, sync_errors
 
     async def sync(
-        self,
-        user: disnake.Member,
+            self,
+            user: disnake.Member,
+            **kwargs,
     ) -> tuple[bool, list[str]] | tuple[bool, list[Any]]:
         """
         Sync user
@@ -225,8 +226,16 @@ class SyncCore(commands.Cog):
         sync_status = True
         sync_errors = []
 
-        guild_is_verified: bool = await is_guild_verified(user_guild.id)
-        guild_settings: Dict[str, bool] = await get_guild_switches(user_guild.id)
+        # https://stackoverflow.com/questions/63751439/dict-get-always-checks-for-the-default-value-even-if-not-necessary
+        if "guild_is_verified" in kwargs:
+            guild_is_verified: bool = kwargs.get("guild_is_verified")
+        else:
+            guild_is_verified: bool = await is_guild_verified(user_guild.id)
+        if "guild_settings" in kwargs:
+            guild_settings: Dict[str, bool] = kwargs.get("guild_settings")
+        else:
+            guild_settings: Dict[str, bool] = await get_guild_switches(user_guild.id)
+
         guild_bot_permissions = user_guild.get_member(
             self.bot.user.id
         ).guild_permissions
