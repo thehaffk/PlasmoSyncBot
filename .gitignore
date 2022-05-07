@@ -11,4 +11,4 @@ venv/
 .idea/*
 logs/
 logs/*
-!/plasmosync/data.db
+*.db

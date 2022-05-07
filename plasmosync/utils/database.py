@@ -260,6 +260,7 @@ async def check_guild(guild_id):
     """
     Check if row with given guild id exists and fix it if it's not
     """
+    # TODO: Make it decorator
 
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(

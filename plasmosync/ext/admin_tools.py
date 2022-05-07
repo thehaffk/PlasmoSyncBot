@@ -20,7 +20,6 @@ class AdminTools(commands.Cog):
         self.bot = bot
 
     # TODO: /force-sync-all-guilds
-    # TODO: /force-update-ban <userid>
 
     @commands.guild_only()
     @commands.is_owner()
@@ -112,6 +111,30 @@ class AdminTools(commands.Cog):
         await self.leave_guild_command.invoke(inter=inter, guild_id=guild_id)
         await asyncio.sleep(10)  # Wait for on_guild_remove handler to deactivate guild
         await database.wipe_guild_data(guild_id)
+
+    @commands.guild_only()
+    @commands.is_owner()
+    @commands.slash_command(name="sync-ban")
+    async def wipe_and_leave_guild_command(self, inter: ApplicationCommandInteraction, user_id: LargeInt):
+        """
+        Синхронизировать бан пользователя на всех серверах, где включена синхронизация банов
+        """
+        logger.debug("Force updating ban for %s", user_id)
+
+        await inter.response.defer(ephemeral=True)
+        guilds_to_sync = await database.get_active_guilds(switch="sync_bans")
+        user = self.bot.get_user(user_id)
+        if user is None:
+            await inter.edit_original_message(content=f"Unable to get user <@{user_id}>")
+            return
+        for guild_id in guilds_to_sync:
+            if not (await database.is_guild_verified(guild_id)):
+                continue
+
+            guild = self.bot.get_guild(guild_id)
+            core = self.bot.get_cog("SyncCore")
+            await core.sync_bans(user=user, user_guild=guild)
+        await inter.edit_original_message(content="Done")
 
 
 def setup(client):
