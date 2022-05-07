@@ -12,19 +12,10 @@ load_dotenv()
 DEBUG_VALUES = False
 OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
 TOKEN = os.getenv("BOT_TOKEN")
-TEST_GUILDS = [966785796902363188, 828683007635488809]
+TEST_GUILDS = [966785796902363188, 828683007635488809, 756750263351771146]
 DATABASE_PATH = "plasmosync/data.db"
-# WIKI_LINK = "https://www.notion.so/Discord-9827cd8b10ee4c33920d9c973ad90a6a"  # TODO: Add different wikis to
-#  different servers
-# rp_api_link = "https://rp.plo.su/api/"
-# verified_text = "<:plasmoverified:943963401607069738> Verified"
-# verified_description = (
-#    "<:plasmoverified:943963401607069738> Cервер верифицирован командой Plasmo"
-# )
-# enabled_emoji = "<:plasmosyncenabled:944002031780233216>"
-# disabled_emoji = "<:plasmosyncdisabled:944002049752858704>"
 
-WIKI_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+WIKI_URL = "https://rp.plo.su/wiki/commune"
 ABOUT_VERIFIED_SERVERS_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 
@@ -43,8 +34,8 @@ class PlasmoRole:
 
 class Emojis:
     verified = r"<:verified:969672029877977119>"
-    enabled = r"<:enabled:969672429981016084>"
-    disabled = r"<:disabled:969672065160474684>"
+    enabled = r"✅"
+    disabled = r"❌"
 
 
 # ALL DONORS MUST HAVE SYNC_ROLES AND SYNC_NICKNAMES SWITCHES
@@ -200,9 +191,7 @@ class PlasmoRP:
     )
     settings.append(sync_bans)
 
-    settings_by_aliases = dict()
-    for setting in settings:
-        settings_by_aliases[setting.alias] = setting
+    settings_by_aliases = {setting.alias: setting for setting in settings}
 
 
 class PlasmoSMP:

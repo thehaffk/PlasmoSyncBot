@@ -113,7 +113,7 @@ class Listeners(commands.Cog):
             await database.deactivate_guild(guild_id=guild.id)
 
     async def cog_load(self) -> None:
-        logger.info("Loaded %s", __name__)
+        logger.info("Loaded Listeners")
         self.core = self.bot.get_cog("SyncCore")
 
 

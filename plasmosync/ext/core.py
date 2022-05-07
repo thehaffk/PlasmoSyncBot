@@ -98,6 +98,7 @@ class SyncCore(commands.Cog):
         user_guild = user.guild if user_guild is None else user_guild
         donor_guild = self.bot.get_guild(settings.DONOR.guild_discord_id)
 
+        # Cringe
         async for ban in donor_guild.bans():
             if ban.user.id == user.id:
                 try:
@@ -220,7 +221,7 @@ class SyncCore(commands.Cog):
 
         user_guild: disnake.Guild
 
-        logger.info("Syncing %s at %s", user, user_guild)
+        logger.debug("Syncing %s at %s", user, user_guild)
         sync_status = True
         sync_errors = []
 

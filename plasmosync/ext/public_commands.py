@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import List
 
@@ -26,7 +28,7 @@ class SettingButton(disnake.ui.Button["GuildSwitch"]):
                 verified_servers_only=False,
             )
         else:
-            self.switch: config.Setting = settings.DONOR.settings_by_aliases.get(
+            self.switch: config.Setting | None = settings.DONOR.settings_by_aliases.get(
                 setting_alias, None
             )
 
@@ -230,7 +232,8 @@ class PublicCommands(commands.Cog):
                             f"от [digital drugs technologies]({config.DevServer.invite_url}) "
                             f"с [открытым исходным кодом](https://github.com/howkawgew/PlasmoSyncBot)\n\n"
                             f"[Гайд в вики Plasmo RP](https://rp.plo.su/wiki/commune)(под гайдом про общины)",
-            ).add_field(
+            )
+                .add_field(
                 name="Команды",
                 inline=False,
                 value="""
@@ -243,13 +246,13 @@ class PublicCommands(commands.Cog):
             `/help ` - выводит это сообщение 
             `Кнопка Синхронизировать` - то же самое что и /sync  
             """,
-            ).set_footer(
+            )
+                .set_footer(
                 text="Copyright © 2021 - present howkawgew",
                 icon_url="https://images-ext-1.discordapp.net/external"
                          "/ZLcJhwmNS-PvOEkbz6Ct2Xf8xGDWD1JrDFptzsGTXmY"
                          "/%3Fsize%3D512/https/cdn.discordapp.com/avatars"
                          "/872182651644170240/518f424a8783644027de70bf8b3069be.png",
-
             ),
         )
 
