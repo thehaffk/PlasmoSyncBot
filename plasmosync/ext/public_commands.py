@@ -256,17 +256,7 @@ class PublicCommands(commands.Cog):
             ),
         )
 
-    @commands.slash_command(name="sync")
-    async def sync_command(
-            self, inter: ApplicationCommandInteraction, user: disnake.Member
-    ):
-        """
-        Синхронизировать пользователя
-
-        Parameters
-        ----------
-        user: User to sync
-        """
+    async def sync_user(self, inter: ApplicationCommandInteraction, user: disnake.Member):
         logger.debug("/sync called in %s %s", inter.guild, inter.guild_id)
         await inter.response.defer(with_message=False, ephemeral=True)
 
@@ -303,16 +293,27 @@ class PublicCommands(commands.Cog):
             embed=synced_embed,
         )
 
+    @commands.slash_command(name="sync")
+    async def sync_command(
+            self, inter: ApplicationCommandInteraction, user: disnake.Member
+    ):
+        """
+        Синхронизировать пользователя
+
+        Parameters
+        ----------
+        user: User to sync
+        """
+        return await self.sync_user(inter, user)
+
     @user_command(name="Синхронизировать")
     async def sync_button(
-        self, inter: ApplicationCommandInteraction, user: disnake.Member
+            self, inter: ApplicationCommandInteraction, user: disnake.Member
     ):
         """
         "Sync" button
-        :param inter: button interaction
-        :param user: user to sync
         """
-        return await self.sync_command(inter, user)
+        return await self.sync_user(inter, user)
 
     @commands.guild_only()
     @commands.slash_command(name="settings")
@@ -422,7 +423,6 @@ class PublicCommands(commands.Cog):
             )
         await inter.edit_original_message(embed=status_embed)
 
-    #
 
     @commands.guild_only()
     @commands.has_permissions(manage_roles=True)  # TODO: Rewrite with perms v2
