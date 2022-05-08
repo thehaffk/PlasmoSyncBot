@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG_VALUES = False  # Replace donor values with debug values
-DEVMODE = True  # Fast command registration
+DEBUG_VALUES = bool(os.getenv("DEBUG_VALUES", False))  # Replace donor values with debug values
+DEVMODE = bool(os.getenv("DEVMODE", False))  # Fast command registration
 OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
 TOKEN = os.getenv("BOT_TOKEN")
 TEST_GUILDS = [966785796902363188, 828683007635488809]

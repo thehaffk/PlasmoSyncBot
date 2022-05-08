@@ -41,13 +41,13 @@ class Listeners(commands.Cog):
         if guild.id == settings.DONOR.guild_discord_id:
             guilds_to_sync = await database.get_active_guilds(switch="sync_bans")
             for guild_id in guilds_to_sync:
-                guild = self.bot.get_guild(guild_id)
+                user_guild = self.bot.get_guild(guild_id)
                 if (
                         guild is not None
-                        and await database.is_guild_verified(guild.id)
-                        and (member := await guild.getch_member(user.id)) is not None
+                        and (member := await user_guild.getch_member(user.id)) is None
                 ):
-                    await self.core.sync(member)
+                    print(user, user_guild)
+                    await self.core.sync_bans(user, user_guild)
         else:
             await self.bot.get_guild(config.DevServer.id).get_channel(
                 config.DevServer.bot_logs_channel_id

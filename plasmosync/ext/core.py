@@ -130,12 +130,19 @@ class SyncCore(commands.Cog):
                     return True, []
                 except disnake.Forbidden as error:
                     logger.debug(
-                        "Unable to unban %s in %s, error \n %s",
+                        "Unable to unban %s in %s, error %s",
                         user,
                         user_guild,
                         error,
                     )
                     return False, [f"Не удалось разбанить пользователя ({user})"]
+                except disnake.NotFound as error:
+                    logger.debug(
+                        "Unable to unban %s in %s, error %s",
+                        user,
+                        user_guild,
+                        error,
+                    )
         return True, []
 
     async def _api_sync(
