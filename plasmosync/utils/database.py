@@ -3,11 +3,11 @@ from typing import Optional, Dict, List
 
 import aiosqlite
 
-from plasmosync import config, settings
+from plasmosync import settings
 
 logger = logging.getLogger(__name__)
 
-PATH = config.DATABASE_PATH
+PATH = settings.DATABASE_PATH
 
 
 async def setup() -> bool:

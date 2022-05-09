@@ -9,12 +9,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG_VALUES = bool(os.getenv("DEBUG_VALUES", False))  # Replace donor values with debug values
+DEBUG_VALUES = bool(
+    os.getenv("DEBUG_VALUES", False)
+)  # Replace donor values with debug values
 DEVMODE = bool(os.getenv("DEVMODE", False))  # Fast command registration
 OWNERS = [737501414141591594, 222718720127139840, 191836876980748298]
 TOKEN = os.getenv("BOT_TOKEN")
 TEST_GUILDS = [966785796902363188, 828683007635488809]
-DATABASE_PATH = "plasmosync/data.db"
 
 WIKI_URL = "https://rp.plo.su/wiki/commune"
 ABOUT_VERIFIED_SERVERS_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
@@ -164,6 +165,14 @@ class PlasmoRP:
         verified_servers_only=False,
     )
     settings.append(sync_roles)
+    whitelist = Setting(
+        alias="whitelist",
+        name="Вайтлист игроков",
+        description='**Plasmo Sync** будет кикать пользователей с сервера, если у них нет роли "Игрок" на Plasmo RP',
+        default=False,
+        verified_servers_only=False,
+    )
+    settings.append(whitelist)
     use_api = Setting(
         alias="use_api",
         name="Использование API",
@@ -172,14 +181,6 @@ class PlasmoRP:
         verified_servers_only=True,
     )
     settings.append(use_api)
-    whitelist = Setting(
-        alias="whitelist",
-        name="Вайтлист игроков",
-        description='**Plasmo Sync** будет кикать пользователей с сервера, если у них нет роли "Игрок" на Plasmo RP',
-        default=False,
-        verified_servers_only=True,
-    )
-    settings.append(whitelist)
 
     sync_bans = Setting(
         alias="sync_bans",

@@ -256,7 +256,9 @@ class PublicCommands(commands.Cog):
             ),
         )
 
-    async def sync_user(self, inter: ApplicationCommandInteraction, user: disnake.Member):
+    async def sync_user(
+            self, inter: ApplicationCommandInteraction, user: disnake.Member
+    ):
         logger.debug("/sync called in %s %s", inter.guild, inter.guild_id)
         await inter.response.defer(with_message=False, ephemeral=True)
 
@@ -423,7 +425,6 @@ class PublicCommands(commands.Cog):
             )
         await inter.edit_original_message(embed=status_embed)
 
-
     @commands.guild_only()
     @commands.has_permissions(manage_roles=True)  # TODO: Rewrite with perms v2
     @commands.slash_command(name="set-role")
@@ -444,13 +445,25 @@ class PublicCommands(commands.Cog):
         role: Локальная роль
         """
         await inter.response.defer(ephemeral=True)
+        if role_alias not in settings.DONOR.roles_by_aliases:
+            return await inter.edit_original_message(
+                embed=disnake.Embed(
+                    title="Ошибка - Роли не существует",
+                    description=f"Роль {role_alias} отсутствует или написана с ошибкой",
+                    color=disnake.Color.dark_red(),
+                ).add_field(
+                    name="Примечание",
+                    value="Мобильная версия Discord может работать с autocompleters нестабильно"
+                          " используйте десктоп/веб версию если можете",
+                )
+            )
         await database.set_role(inter.guild_id, role_alias, role.id)
 
         await inter.edit_original_message(
             embed=disnake.Embed(
                 title="Настройки обновлены",
                 description=f"Роль {role.mention} "
-                f"установлена как **{settings.DONOR.roles_by_aliases[role_alias].name}**",
+                            f"установлена как **{settings.DONOR.roles_by_aliases[role_alias].name}**",
                 color=disnake.Color.dark_green(),
             )
         )
@@ -473,6 +486,18 @@ class PublicCommands(commands.Cog):
         role_alias: Роль на Plasmo
         """
         await inter.response.defer(ephemeral=True)
+        if role_alias not in settings.DONOR.roles_by_aliases:
+            return await inter.edit_original_message(
+                embed=disnake.Embed(
+                    title="Ошибка - Роли не существует",
+                    description=f"Роль {role_alias} отсутствует или написана с ошибкой",
+                    color=disnake.Color.dark_red(),
+                ).add_field(
+                    name="Примечание",
+                    value="Мобильная версия Discord может работать с autocompleters нестабильно"
+                          " используйте десктоп/веб версию если можете",
+                )
+            )
         await database.set_role(inter.guild_id, role_alias, value=None)
 
         await inter.edit_original_message(

@@ -1,11 +1,15 @@
+import logging
+
 import disnake
 
 from plasmosync.settings import DONOR
 from plasmosync.utils.database import is_guild_verified, get_guild_roles
 
+logger = logging.getLogger(__name__)
+
 
 async def autocomplete_set_role(
-    inter: disnake.ApplicationCommandInteraction, value: str
+        inter: disnake.ApplicationCommandInteraction, value: str
 ) -> dict[str, str]:
     guild_id = inter.guild.id
     guild_is_verified = await is_guild_verified(guild_id)
@@ -18,7 +22,6 @@ async def autocomplete_set_role(
             guild_is_verified and role.verified_servers_only
         ):
             autocomplete_results[role.name] = role.alias
-
     return autocomplete_results
 
 
