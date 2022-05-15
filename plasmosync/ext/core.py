@@ -57,10 +57,11 @@ class SyncCore(commands.Cog):
         donor_user = donor_guild.get_member(user.id)
         if donor_user is None:
             roles_to_remove = [
-                donor_guild.get_role(role_id)
-                for role_id in (
-                    await plasmosync.utils.database.get_guild_roles(user.id)
-                ).values()
+                role for role in [user.guild.get_role(role_id)
+                                  for role_id in (
+                                      await plasmosync.utils.database.get_guild_roles(user.guild.id)
+                                  ).values()]
+                if role is not None
             ]
             roles_to_add = []
 
