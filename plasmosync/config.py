@@ -61,7 +61,7 @@ class PlasmoRP:
     api_base_url = "https://rp.plo.su/api"
 
     roles = []
-
+    # я почему-то уверен что оно умрет нахуй если я не объявлю роль игрока
     player_role = PlasmoRole(
         discord_id=943941965655973888 if DEBUG_VALUES else 746628733452025866,
         name="Игрок",
@@ -70,79 +70,23 @@ class PlasmoRP:
         verified_servers_only=False,
     )
     roles.append(player_role)
-    fusion_role = PlasmoRole(
-        discord_id=943942028054650881 if DEBUG_VALUES else 751722994170331136,
-        name="Fusion",
-        alias="fusion",
-        api_alias="support",
-        verified_servers_only=False,
+    dandelion_role = PlasmoRole(
+        discord_id=943941965655973888 if DEBUG_VALUES else 987720472747704391,
+        name="Одуванчик",
+        alias="dandelion",
+        api_alias="dandelion",
+        verified_servers_only=True,
     )
-    roles.append(fusion_role)
-    interpol_role = PlasmoRole(
-        discord_id=943942071906078831 if DEBUG_VALUES else 751723033357451335,
-        name="Интерпол",
-        alias="interpol",
-        api_alias="helper",
-        verified_servers_only=False,
+    roles.append(dandelion_role)
+    poppy_role = PlasmoRole(
+        discord_id=943942028054650881 if DEBUG_VALUES else 987720434386632764,
+        name="Мак",
+        alias="poppy",
+        api_alias="poppy",
+        verified_servers_only=True,
     )
-    roles.append(interpol_role)
-    admin_role = PlasmoRole(
-        discord_id=943942125198905414 if DEBUG_VALUES else 704364763248984145,
-        name="Администрация",
-        alias="admin",
-        api_alias="admin",
-        verified_servers_only=False,
-    )
-    roles.append(admin_role)
+    roles.append(poppy_role)
 
-    support_role = PlasmoRole(
-        discord_id=943942163400626257 if DEBUG_VALUES else 872899130270294046,
-        name="Поддержка",
-        alias="support",
-        api_alias=None,
-        verified_servers_only=True,
-    )
-    roles.append(support_role)
-    banker_role = PlasmoRole(
-        discord_id=943942205129756673 if DEBUG_VALUES else 826367015014498314,
-        name="Банкир",
-        alias="banker",
-        api_alias="banker",
-        verified_servers_only=True,
-    )
-    roles.append(banker_role)
-    mko_member_role = PlasmoRole(
-        discord_id=943942205129756673 if DEBUG_VALUES else 844507728671277106,
-        name="Участник совета МКО",
-        alias="mko_member",
-        api_alias=None,
-        verified_servers_only=True,
-    )
-    roles.append(mko_member_role)
-    mko_helper_role = PlasmoRole(
-        discord_id=943942311551844442 if DEBUG_VALUES else 826366703591620618,
-        name="Помощник совета глав",
-        alias="mko_helper",
-        api_alias="soviet-helper",
-        verified_servers_only=True,
-    )
-    roles.append(mko_helper_role)
-    mko_head_role = PlasmoRole(
-        discord_id=943942349178937344 if DEBUG_VALUES else 810492714235723777,
-        name="Член совета глав МКО",
-        alias="mko_head",
-        api_alias="supa_helper",
-        verified_servers_only=True,
-    )
-    roles.append(mko_head_role)
-    president_role = PlasmoRole(
-        discord_id=948303445281108038 if DEBUG_VALUES else 880065048792420403,
-        name="Президент МКО",
-        alias="president",
-        api_alias="president",
-        verified_servers_only=True,
-    )
-    roles.append(president_role)
 
     roles_by_aliases = dict()
     for role in roles:
