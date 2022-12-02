@@ -31,10 +31,11 @@ class SyncCore(commands.Cog):
         donor_guild = self.bot.get_guild(settings.DONOR.guild_discord_id)
         nickname = donor_guild.get_member(user.id).display_name
         try:
-            await user.edit(
-                nick=nickname,
-                reason="Nicknames sync is enabled," " use /settings to disable",
-            )
+            if user.display_name != nickname:
+                await user.edit(
+                    nick=nickname,
+                    reason="Nicknames sync is enabled," " use /settings to disable",
+                )
             return True, []
         except disnake.Forbidden as error:
             logger.debug(
@@ -201,11 +202,12 @@ class SyncCore(commands.Cog):
                 sync_errors.append("[API] У бота нет права `manage_roles`")
             else:
                 try:
-                    await user.edit(
-                        nick=username,
-                        reason="Nicknames sync and API are enabled,"
-                               " use /settings to disable",
-                    )
+                    if user.display_name != nickname:
+                        await user.edit(
+                            nick=username,
+                            reason="Nicknames sync and API are enabled,"
+                                   " use /settings to disable",
+                        )
                 except disnake.Forbidden:
                     sync_status = False
                     sync_errors.append(f"[API] Не удалось сменить ник ({user})")
