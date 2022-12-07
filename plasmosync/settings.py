@@ -4,15 +4,15 @@ import logging
 from typing import Type
 
 from plasmosync import config
-from plasmosync.config import PlasmoRP, PlasmoSMP, PlasmoFRP
+from plasmosync.config import PlasmoRP, PlasmoSMP
 
 logger = logging.getLogger(__name__)
 
 DEBUG = True
-DONOR: Type[PlasmoRP] | Type[PlasmoSMP] | Type[PlasmoFRP] = PlasmoRP
+DONOR: Type[PlasmoRP] | Type[PlasmoSMP] = PlasmoRP
 DATABASE_PATH = "plasmosync/data.db"
 
-if DONOR not in [PlasmoRP, PlasmoSMP, PlasmoFRP]:
+if DONOR not in [PlasmoRP, PlasmoSMP]:
     raise ValueError("???? Pepega")
 
 if not all(
