@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class SettingButton(disnake.ui.Button["GuildSwitch"]):
     def __init__(
-        self, setting_alias: str, switch_position=False, no_access=False, row=0
+            self, setting_alias: str, switch_position=False, no_access=False, row=0
     ):
 
         if setting_alias == "is_verified":
@@ -54,8 +54,8 @@ class SettingButton(disnake.ui.Button["GuildSwitch"]):
         await inter.response.defer(ephemeral=True)
 
         if (
-            not inter.author.guild_permissions.manage_guild
-            and inter.author.id not in config.OWNERS
+                not inter.author.guild_permissions.manage_guild
+                and inter.author.id not in config.OWNERS
         ):
             return await inter.edit_original_message(
                 embed=disnake.Embed(
@@ -103,10 +103,10 @@ class SettingsView(disnake.ui.View):
     children: List[SettingButton]
 
     def __init__(
-        self,
-        inter: disnake.Interaction,
-        local_settings: dict[str, bool] = None,
-        guild_is_verified=False,
+            self,
+            inter: disnake.Interaction,
+            local_settings: dict[str, bool] = None,
+            guild_is_verified=False,
     ):
         super().__init__(timeout=600)
         for index, setting in enumerate(settings.DONOR.settings):
@@ -144,7 +144,7 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
 
     settings_embed = disnake.Embed(
         title=f"Локальные настройки Plasmo Sync |"
-        f" {config.Emojis.verified if guild_is_verified else ''} {guild.name}",
+              f" {config.Emojis.verified if guild_is_verified else ''} {guild.name}",
         color=disnake.Color.dark_green(),
     )
 
@@ -154,10 +154,10 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
         if guild_is_verified if setting.verified_servers_only else True:
             settings_embed.add_field(
                 name=(
-                    config.Emojis.enabled if local_setting else config.Emojis.disabled
-                )
-                + " "
-                + setting.name,
+                         config.Emojis.enabled if local_setting else config.Emojis.disabled
+                     )
+                     + " "
+                     + setting.name,
                 value=setting.description,
                 inline=False,
             )
@@ -167,7 +167,7 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
         settings_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Настройки {', '.join([('**' + switch.name + '**') for switch in inaccessible_switches])}"
-            f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
+                  f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
             inline=False,
         )
 
@@ -203,7 +203,7 @@ async def get_settings_embeds(guild: disnake.Guild, **kwargs) -> List[disnake.Em
         roles_embed.add_field(
             name="🔒 Сервер не верифицирован",
             value=f"Роли {', '.join([('**' + role.name + '**') for role in inaccessible_roles])}"
-            f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
+                  f" доступны для синхронизации только [верифицированым серверам]({config.ABOUT_VERIFIED_SERVERS_URL})",
             inline=False,
         )
 
@@ -347,7 +347,7 @@ class PublicCommands(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.has_permissions(
+    @commands.default_member_permissions(
         manage_roles=True, manage_nicknames=True
     )  # TODO: Rewrite with perms v2
     @commands.slash_command(name="everyone-sync")
@@ -369,15 +369,15 @@ class PublicCommands(commands.Cog):
         guild_is_verified = await database.is_guild_verified(inter.guild_id)
         guild_settings = await database.get_guild_switches(inter.guild_id)
 
+        lazy_update_members_count = inter.guild.member_count // 10
         for counter, member in enumerate(members):
             status_embed.clear_fields()
             if member.bot:
                 status_embed.add_field(
-                    name=f"Пользователи: {counter + 1}/{len(members)}",
-                    value=methods.build_progressbar(counter + 1, len(members))
-                          + f"\n{member} - синхронизация ботов отключена",
+                    name=f"Прогресс...",
+                    value=methods.build_progressbar(counter + 1, len(members)),
                 )
-
+                sync_status, sync_errors = True, []
             else:
                 sync_status, sync_errors = await self.core.sync(
                     member,
@@ -387,14 +387,12 @@ class PublicCommands(commands.Cog):
                 errors += sync_errors
                 if sync_status:
                     status_embed.add_field(
-                        name=f"Пользователи: {counter + 1}/{len(members)}",
-                        value=methods.build_progressbar(counter + 1, len(members))
-                              + "\n"
-                              + f"{member} - синхронизация прошла успешно",
+                        name=f"Прогресс...",
+                        value=methods.build_progressbar(counter + 1, len(members)),
                     )
                 else:
                     status_embed.add_field(
-                        name=f"Пользователи: {counter + 1}/{len(members)}",
+                        name=f"Прогресс...",
                         value=utils.methods.build_progressbar(counter + 1, len(members))
                               + "\n"
                               + f"{member} - синхронизация прошла с ошибками",
@@ -407,13 +405,13 @@ class PublicCommands(commands.Cog):
                     value="❌" + "\n❌".join(errors)[:1020],
                     inline=False,
                 )
-
-            await inter.edit_original_message(embed=status_embed)
+            if counter % lazy_update_members_count == 0 or sync_errors:
+                await inter.edit_original_message(embed=status_embed)
             continue
 
         status_embed.clear_fields()
         status_embed.add_field(
-            name=f"Синхронизация пользователей: {len(members)}/{len(members)}",
+            name=f"Синхронизировано пользователей: {len(members)}/{len(members)}",
             value=methods.build_progressbar(1, 1),
             inline=False,
         )
@@ -426,15 +424,15 @@ class PublicCommands(commands.Cog):
         await inter.edit_original_message(embed=status_embed)
 
     @commands.guild_only()
-    @commands.has_permissions(manage_roles=True)  # TODO: Rewrite with perms v2
+    @commands.default_member_permissions(manage_roles=True)
     @commands.slash_command(name="set-role")
     async def setrole_command(
-        self,
-        inter: ApplicationCommandInteraction,
-        role_alias: str = commands.Param(
-            autocomplete=autocompleters.autocomplete_set_role
-        ),
-        role: disnake.Role = commands.Param(),
+            self,
+            inter: ApplicationCommandInteraction,
+            role_alias: str = commands.Param(
+                autocomplete=autocompleters.autocomplete_set_role
+            ),
+            role: disnake.Role = commands.Param(),
     ):
         """
         Установить роль для синхронизации
@@ -469,14 +467,14 @@ class PublicCommands(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.has_permissions(manage_roles=True)
+    @commands.default_member_permissions(manage_roles=True)
     @commands.slash_command(name="reset-role")
     async def resetrole_command(
-        self,
-        inter: ApplicationCommandInteraction,
-        role_alias: str = commands.Param(
-            autocomplete=autocompleters.autocomplete_reset_role
-        ),
+            self,
+            inter: ApplicationCommandInteraction,
+            role_alias: str = commands.Param(
+                autocomplete=autocompleters.autocomplete_reset_role
+            ),
     ):
         """
         Сбросить роль
