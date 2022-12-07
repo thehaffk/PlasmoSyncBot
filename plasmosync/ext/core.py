@@ -31,10 +31,11 @@ class SyncCore(commands.Cog):
         donor_guild = self.bot.get_guild(settings.DONOR.guild_discord_id)
         nickname = donor_guild.get_member(user.id).display_name
         try:
-            await user.edit(
-                nick=nickname,
-                reason="Nicknames sync is enabled," " use /settings to disable",
-            )
+            if user.display_name != nickname:
+                await user.edit(
+                    nick=nickname,
+                    reason="Nicknames sync is enabled," " use /settings to disable",
+                )
             return True, []
         except disnake.Forbidden as error:
             logger.debug(
@@ -57,10 +58,14 @@ class SyncCore(commands.Cog):
         donor_user = donor_guild.get_member(user.id)
         if donor_user is None:
             roles_to_remove = [
-                donor_guild.get_role(role_id)
-                for role_id in (
-                    await plasmosync.utils.database.get_guild_roles(user.id)
-                ).values()
+                role
+                for role in [
+                    user.guild.get_role(role_id)
+                    for role_id in (
+                        await plasmosync.utils.database.get_guild_roles(user.guild.id)
+                    ).values()
+                ]
+                if role is not None
             ]
             roles_to_add = []
 
@@ -72,14 +77,16 @@ class SyncCore(commands.Cog):
             )
 
         try:
-            await user.add_roles(
-                *roles_to_add,
-                reason="Roles sync is enabled, use /settings to disable",
-            )
-            await user.remove_roles(
-                *roles_to_remove,
-                reason="Roles sync is enabled, use /settings to disable",
-            )
+            if not all([_role in user.roles for _role in roles_to_add]):
+                await user.add_roles(
+                    *roles_to_add,
+                    reason="Roles sync is enabled, use /settings to disable",
+                )
+            if not all([_role not in user.roles for _role in roles_to_remove]):
+                await user.remove_roles(
+                    *roles_to_remove,
+                    reason="Roles sync is enabled, use /settings to disable",
+                )
             return True, []
         except disnake.Forbidden as error:
             logger.debug(error)
@@ -100,14 +107,14 @@ class SyncCore(commands.Cog):
         donor_guild = self.bot.get_guild(settings.DONOR.guild_discord_id)
 
         # Cringe
-        async for ban in donor_guild.bans():
+        async for ban in donor_guild.bans(limit=3000):
             if ban.user.id == user.id:
                 try:
                     await user_guild.ban(
                         user=disnake.Object(user.id),
                         delete_message_days=0,
                         reason="Sync bans (privileged) is enabled,"
-                        f" use /setting to disable [Plasmo ban reason:  {ban.reason}]",
+                               f" use /setting to disable [Plasmo ban reason:  {ban.reason}]",
                     )
                     return True, []
                 except disnake.Forbidden as error:
@@ -200,11 +207,12 @@ class SyncCore(commands.Cog):
                 sync_errors.append("[API] У бота нет права `manage_roles`")
             else:
                 try:
-                    await user.edit(
-                        nick=username,
-                        reason="Nicknames sync and API are enabled,"
-                        " use /settings to disable",
-                    )
+                    if user.display_name != username:
+                        await user.edit(
+                            nick=username,
+                            reason="Nicknames sync and API are enabled,"
+                                   " use /settings to disable",
+                        )
                 except disnake.Forbidden:
                     sync_status = False
                     sync_errors.append(f"[API] Не удалось сменить ник ({user})")
@@ -297,8 +305,8 @@ class SyncCore(commands.Cog):
 
             # API Sync
             if donor_user is None and guild_settings.get(
-                "use_api",
-                False,
+                    "use_api",
+                    False,
             ):
                 status, api_errors = await self._api_sync(
                     user=user, guild_settings=guild_settings
@@ -306,30 +314,29 @@ class SyncCore(commands.Cog):
                 sync_errors += api_errors
                 sync_status = False if status is False else sync_status
 
-        if donor_user is not None:
-            # Sync roles
-            if guild_settings.get("sync_roles", False):
-                if not guild_bot_permissions.manage_roles:
-                    sync_status = False
-                    sync_errors.append("У бота нет права `manage_roles`")
-                else:
-                    status, errors = await self._sync_roles(user)
-                    sync_status = False if status is False else sync_status
+        # Sync roles
+        if guild_settings.get("sync_roles", False):
+            if not guild_bot_permissions.manage_roles:
+                sync_status = False
+                sync_errors.append("У бота нет пермса `manage_roles`")
+            else:
+                status, errors = await self._sync_roles(user)
+                sync_status = False if status is False else sync_status
 
-                    sync_errors += errors
+                sync_errors += errors
 
-            # Sync nicknames
-            if guild_settings.get(
+        # Sync nicknames
+        if donor_user is not None and guild_settings.get(
                 "sync_nicknames",
                 False,
-            ):
-                if not guild_bot_permissions.manage_nicknames:
-                    sync_status = False
-                    sync_errors.append("У бота нет права `manage_nicknames`")
-                else:
-                    status, errors = await self._sync_nicknames(user)
-                    sync_errors += errors
-                    sync_status = False if status is False else sync_status
+        ):
+            if not guild_bot_permissions.manage_nicknames:
+                sync_status = False
+                sync_errors.append("У бота нет права `manage_nicknames`")
+            else:
+                status, errors = await self._sync_nicknames(user)
+                sync_errors += errors
+                sync_status = False if status is False else sync_status
 
         return sync_status, sync_errors
 
