@@ -77,10 +77,12 @@ class SyncCore(commands.Cog):
             await user.add_roles(
                 *roles_to_add,
                 reason="Roles sync is enabled, use /settings to disable",
+                atomic=False
             )
             await user.remove_roles(
                 *roles_to_remove,
                 reason="Roles sync is enabled, use /settings to disable",
+                atomic=False
             )
             return True, []
         except disnake.Forbidden as error:
@@ -202,7 +204,7 @@ class SyncCore(commands.Cog):
                 sync_errors.append("[API] У бота нет права `manage_roles`")
             else:
                 try:
-                    if user.display_name != nickname:
+                    if user.display_name != username:
                         await user.edit(
                             nick=username,
                             reason="Nicknames sync and API are enabled,"
