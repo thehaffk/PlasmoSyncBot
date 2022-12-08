@@ -346,11 +346,7 @@ class PublicCommands(commands.Cog):
             view=view,
         )
 
-    @commands.guild_only()
-    @commands.default_member_permissions(
-        manage_roles=True, manage_nicknames=True
-    )  # TODO: Rewrite with perms v2
-    @commands.slash_command(name="everyone-sync")
+    @commands.slash_command(name="everyone-sync", dm_permission=False)
     async def everyone_sync(self, inter: ApplicationCommandInteraction):
         """
         Синхронизировать весь сервер
@@ -423,9 +419,8 @@ class PublicCommands(commands.Cog):
             )
         await inter.edit_original_message(embed=status_embed)
 
-    @commands.guild_only()
-    @commands.default_member_permissions(manage_roles=True)
-    @commands.slash_command(name="set-role")
+    @commands.slash_command(name="set-role", dm_permission=False)
+    @commands.default_member_permissions(administrator=True)
     async def setrole_command(
             self,
             inter: ApplicationCommandInteraction,
@@ -466,9 +461,8 @@ class PublicCommands(commands.Cog):
             )
         )
 
-    @commands.guild_only()
-    @commands.default_member_permissions(manage_roles=True)
-    @commands.slash_command(name="reset-role")
+    @commands.slash_command(name="reset-role", dm_permission=False)
+    @commands.default_member_permissions(administrator=True)
     async def resetrole_command(
             self,
             inter: ApplicationCommandInteraction,
