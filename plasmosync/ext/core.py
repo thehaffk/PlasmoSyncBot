@@ -174,7 +174,7 @@ class SyncCore(commands.Cog):
                     return True, []
 
                 if (
-                        response.status != 200
+                        response.status not in [200, 404],
                         or response_json.get("status", False) is False
                         or (userdata := response_json.get("data", None)) is None
                 ):
