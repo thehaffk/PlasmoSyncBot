@@ -401,7 +401,7 @@ class PublicCommands(commands.Cog):
                     value="❌" + "\n❌".join(errors)[:1020],
                     inline=False,
                 )
-            if counter % lazy_update_members_count == 0 or sync_errors:
+            if counter % (lazy_update_members_count + 1) == 0 or sync_errors:
                 await inter.edit_original_message(embed=status_embed)
             continue
 
